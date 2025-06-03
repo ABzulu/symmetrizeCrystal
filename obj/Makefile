@@ -14,7 +14,8 @@ IFLAGS+= -I$(OBJDIR)
 VPATH=${SRCDIR}:${SRCDIR}/fdf
 LDFLAGS=-L$(OBJDIR) -lfdf
 
-OBJECTS=inlineoptions_m.o input_m.o output_m.o m_getopts.o f2kcli.o calculatereciprocallattice_m.o
+OBJECTS=inlineoptions_m.o input_m.o output_m.o m_getopts.o f2kcli.o \
+	calculatereciprocallattice_m.o structureinit_m.o
 FDF=libfdf.a
 
 all: $(MAINEXE)
@@ -32,6 +33,7 @@ constants.o: kind.o
 kinds.o:
 output_m.o: calculatereciprocallattice_m.o
 calculatereciprocallattice_m.o:
+structureinit_m.o: constants.o calculatereciprocallattice_m.o
 
 .PHONY: clean
 

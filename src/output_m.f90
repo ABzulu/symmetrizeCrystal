@@ -31,7 +31,7 @@ subroutine writeOutput( &
 
     write(iounit,'(a)') "%block    LatticeVectors"
     do i = 1,3
-        write(iounit,'(3f16.10)') lattice_vector(1:3,i)
+        write(iounit,'(3f16.10)') lattice_vector(1:3,i)/lattice_constant
     enddo
     write(iounit,'(a)') "%endlock  LatticeVectors"
 
