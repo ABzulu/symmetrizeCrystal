@@ -34,7 +34,7 @@ program symmetrizeCrystal
     ! Atomic coordinates are changed to fractional between -0.5 < x <= 0.5
     call restricAtomicCoordinates(lattice_vectors, n_atom, atomic_coordinates)
     call delaunayReduction( &
-        lattice_vectors, n_atom, atomic_coordinates, lattice_index &
+        lattice_vectors, n_atom, atomic_coordinates, lattice_index, debug &
     )
 
     call writeOutput( &

@@ -27,7 +27,7 @@ subroutine writeOutput( &
 
     open(newunit=iounit, file=output_filename, status='replace')
 
-    write(iounit,'(a,f20.10)') "LatticeConstant", lattice_constant
+    write(iounit,'(a,f20.10,a)') "LatticeConstant", lattice_constant, " Bohr"
 
     write(iounit,'(a)') "%block    LatticeVectors"
     do i = 1,3
@@ -39,29 +39,31 @@ subroutine writeOutput( &
     allocate(temp_atomic_coordinates(3,n_atom))
     temp_atomic_coordinates = atomic_coordinates
 
-    if(leqi(atomic_coordinates_format,'NotScaledCartesianBohr') .or. &
-       leqi(atomic_coordinates_format,'Bohr')) then
+    if(leqi(atomic_coordinates_format,'ScaledByLatticeVectors') .or. &
+       leqi(atomic_coordinates_format,'Fractional')) then
         continue
-    elseif(leqi(atomic_coordinates_format,'NotScaledCartesianAng') .or. &
-        leqi(atomic_coordinates_format,'Ang')) then
-        temp_atomic_coordinates = temp_atomic_coordinates / ANGSTROM_AU
-    elseif(leqi(atomic_coordinates_format,'ScaledCartesian')) then
-        if(lattice_constant .eq. 0.d0) then
-            write(6,*) "Lattice constant not given when atomic coordinates format is 'ScaledCartesian'; Stoping program"
-            stop
-        endif
-        temp_atomic_coordinates = temp_atomic_coordinates / lattice_constant
-    elseif(leqi(atomic_coordinates_format,'ScaledByLatticeVectors') .or. &
-           leqi(atomic_coordinates_format,'Fractional')) then
-        call calculateReciprocalLattice(lattice_vector, reciprocal_lattice_vector, 0)
+    else
         do ia = 1, n_atom
             do i = 1, 3
                 temp_atomic_coordinates(i,ia) = &
-                    reciprocal_lattice_vector(1,i) * atomic_coordinates(1,ia) + &
-                    reciprocal_lattice_vector(2,i) * atomic_coordinates(2,ia) + &
-                    reciprocal_lattice_vector(3,i) * atomic_coordinates(3,ia)
+                    lattice_vector(i,1) * atomic_coordinates(1,ia) + &
+                    lattice_vector(i,2) * atomic_coordinates(2,ia) + &
+                    lattice_vector(i,3) * atomic_coordinates(3,ia)
             enddo
         enddo
+        if(leqi(atomic_coordinates_format,'NotScaledCartesianBohr') .or. &
+           leqi(atomic_coordinates_format,'Bohr')) then
+            continue
+        elseif(leqi(atomic_coordinates_format,'NotScaledCartesianAng') .or. &
+               leqi(atomic_coordinates_format,'Ang')) then
+            temp_atomic_coordinates = temp_atomic_coordinates / ANGSTROM_AU
+        elseif(leqi(atomic_coordinates_format,'ScaledCartesian')) then
+            if(lattice_constant .eq. 0.d0) then
+                write(6,*) "Lattice constant not given when atomic coordinates format is 'ScaledCartesian'; Stoping program"
+                stop
+            endif
+            temp_atomic_coordinates = temp_atomic_coordinates / lattice_constant
+        endif
     endif
 
     write(iounit,'(2a)') "AtomicCoordinatesFormat", atomic_coordinates_format

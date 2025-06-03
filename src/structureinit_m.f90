@@ -43,11 +43,12 @@ subroutine restricAtomicCoordinates( &
 end subroutine restricAtomicCoordinates
 
 subroutine delaunayReduction( &
-    lattice_vectors, n_atom, atomic_coordinates, lattice_index &
+    lattice_vectors, n_atom, atomic_coordinates, lattice_index, debug &
 )
     integer, intent(in) :: n_atom
     double precision, intent(inout) :: lattice_vectors(3,3), atomic_coordinates(3,n_atom)
     integer, intent(out) :: lattice_index(3)
+    logical, intent(in) :: debug
 
     integer :: temp_i
     double precision :: a_sqr(3), temp_a, temp_lattice_vectors(3,3), scalar_product(3)
@@ -56,6 +57,7 @@ subroutine delaunayReduction( &
 
     integer :: ir, i
 
+    done = .false.
     lattice_index(1) = 1
     lattice_index(2) = 2
     lattice_index(3) = 3
@@ -105,6 +107,14 @@ subroutine delaunayReduction( &
             lattice_vectors(1,lattice_index(3)) * lattice_vectors(1,lattice_index(1)) + &
             lattice_vectors(2,lattice_index(3)) * lattice_vectors(2,lattice_index(1)) + &
             lattice_vectors(3,lattice_index(3)) * lattice_vectors(3,lattice_index(1))
+
+        if(debug) write(6,*) "delaunayReduction: scalar product", scalar_product(:)
+
+        if((scalar_product(1) .le. eps16) .and. &
+           (scalar_product(2) .le. eps16) .and. &
+           (scalar_product(3) .le. eps16)) done = .true.
+
+        if(debug) write(6,*) "delaunayReduction: done", done
 
         if(.not. done) then
             if(maxloc(scalar_product,dim=1) .eq. 1) then
