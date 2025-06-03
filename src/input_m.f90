@@ -1,6 +1,7 @@
 module input_m
-
     use constants, only: ANGSTROM_AU
+
+    implicit none
 
     public :: readInput, formatInput
 
@@ -68,7 +69,7 @@ subroutine formatInput( &
 
     if(leqi(atomic_coordinates_format,'NotScaledCartesianBohr') .or. &
        leqi(atomic_coordinates_format,'Bohr')) then
-       continue
+        continue
     elseif(leqi(atomic_coordinates_format,'NotScaledCartesianAng') .or. &
            leqi(atomic_coordinates_format,'Ang')) then
         atomic_coordinates = atomic_coordinates * ANGSTROM_AU

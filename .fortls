@@ -1,0 +1,6 @@
+{
+  "source_dirs": ["src"],
+  "include_dirs": ["obj"],
+  "excl_paths": ["bin"],
+  "autocomplete_filter": true
+}
