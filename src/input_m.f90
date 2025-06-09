@@ -30,7 +30,7 @@ subroutine readInput( &
     lattice_constant = fdf_physical('LatticeConstant',0.d0,'Bohr')
     if(fdf_block('LatticeVectors', iounit)) then
         do i = 1, 3
-            read(iounit,*) lattice_vector(1:3,i)
+            read(iounit,*) lattice_vector(i,1:3)
         Enddo
     endif
 
@@ -85,9 +85,9 @@ subroutine formatInput( &
             atomic_coordinate_temp(1:3) = atomic_coordinates(1:3,ia)
             do i = 1, 3
                 atomic_coordinates(i,ia) = &
-                    lattice_vector(i,1) * atomic_coordinate_temp(1) + &
-                    lattice_vector(i,2) * atomic_coordinate_temp(2) + &
-                    lattice_vector(i,3) * atomic_coordinate_temp(3)
+                    lattice_vector(1,i) * atomic_coordinate_temp(1) + &
+                    lattice_vector(2,i) * atomic_coordinate_temp(2) + &
+                    lattice_vector(3,i) * atomic_coordinate_temp(3)
             enddo
         enddo
     else

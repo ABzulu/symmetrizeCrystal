@@ -9,7 +9,8 @@ module inlineoptions_m
 
 contains
 
-subroutine getInlineOptions(output_filename, debug)
+subroutine getInlineOptions(lattice_tol, atomic_tol, output_filename, debug)
+    double precision, intent(out) :: lattice_tol, atomic_tol
     character(len=132), intent(out) :: output_filename
     logical, intent(out) :: debug 
 
@@ -18,12 +19,14 @@ subroutine getInlineOptions(output_filename, debug)
     character(len=8) :: optName
     logical, external :: makedirqq
 
+    lattice_tol = 1.0d0
+    atomic_tol = 1.0d-5
     output_filename = "symmetrizedStructure.out"
     debug = .false.
 
     nopts = 0
     do
-        call getopts('hdo:', optName, optArg, nopts, iostat)
+        call getopts('hdl:a:o:', optName, optArg, nopts, iostat)
         if( iostat /= 0 ) exit
         select case( optName )
         case( 'h' )
@@ -31,6 +34,10 @@ subroutine getInlineOptions(output_filename, debug)
             stop
         case( 'd' )
             debug = .true.
+        case( 'l' )
+            read(optArg,*) lattice_tol
+        case( 'a' )
+            read(optArg,*) atomic_tol
         case( 'o' )
             read(optArg,*) output_filename
         end select
@@ -55,6 +62,8 @@ subroutine manual()
     print *, '  '
     print *, '  -h            Print this help'
     print *, '  -d            Enable debug mode'
+    print *, '  -l            Lattice tolerance for searching point group'
+    print *, '  -a            Atomic tolerance for searching space group'
     print *, '  -o            Symmetrized output filename'
     print *, '----------------------------------------------------------------'
 end subroutine manual

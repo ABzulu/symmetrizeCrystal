@@ -35,5 +35,5 @@
 .vscode
 
 make.inc
-
+debug
 *.tmp

@@ -4,32 +4,50 @@ module structureinit_m
 
     implicit none
 
-    public :: delaunayReduction, restricAtomicCoordinates
+    public :: calculateMetric, restricAtomicCoordinates
 
     private
 
 contains
 
 subroutine restricAtomicCoordinates( &
-    lattice_vectors, n_atom, atomic_coordinates &
+    lattice_vectors, n_atom, atomic_coordinates, debug &
 )
     integer, intent(in) :: n_atom
     double precision, intent(in) :: lattice_vectors(3,3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
+    logical, intent(in) :: debug
 
     integer :: ia, i
     double precision :: temp_atomic_coordinate(3), reciprocal_lattice_vectors(3,3)
 
     ! Change atomic coordinate formats to fractional 
     ! and make the interval -0.5 < x <= 0.5
+    if(debug) then
+        write(6,*) "restricAtomicCoordinates: lattice_vectors"
+        write(6,'(3f16.9)') lattice_vectors(1,1:3)
+        write(6,'(3f16.9)') lattice_vectors(2,1:3)
+        write(6,'(3f16.9)') lattice_vectors(3,1:3)
+        write(6,*) "restricAtomicCoordinates: atomic_coordinates"
+        do ia = 1, n_atom
+            write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
+        enddo
+    endif
     call calculateReciprocalLattice(lattice_vectors, reciprocal_lattice_vectors, 0)
+    if(debug) then
+        write(6,*) "restricAtomicCoordinates: reciprocal_lattice_vectors"
+        write(6,'(3f16.9)') reciprocal_lattice_vectors(1,1:3)
+        write(6,'(3f16.9)') reciprocal_lattice_vectors(2,1:3)
+        write(6,'(3f16.9)') reciprocal_lattice_vectors(3,1:3)
+    endif
+    if(debug) write(6,*) "restricAtomicCoordinates: atomic_coordinates"
     do ia = 1, n_atom
         temp_atomic_coordinate(1:3) = atomic_coordinates(1:3,ia)
         do i = 1, 3
             atomic_coordinates(i,ia) = &
-                reciprocal_lattice_vectors(1,i) * temp_atomic_coordinate(1) + &
-                reciprocal_lattice_vectors(2,i) * temp_atomic_coordinate(2) + &
-                reciprocal_lattice_vectors(3,i) * temp_atomic_coordinate(3)
+                reciprocal_lattice_vectors(i,1) * temp_atomic_coordinate(1) + &
+                reciprocal_lattice_vectors(i,2) * temp_atomic_coordinate(2) + &
+                reciprocal_lattice_vectors(i,3) * temp_atomic_coordinate(3)
             ! Makes the interval -0.5 < x <= 0.5
             atomic_coordinates(i,ia) = &
                 modulo(atomic_coordinates(i,ia)+0.5d0,1.d0) - 0.5d0
@@ -38,25 +56,27 @@ subroutine restricAtomicCoordinates( &
                 atomic_coordinates(i,ia) = 0.5d0
             endif
         enddo
+        if(debug) write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
     enddo
 
 end subroutine restricAtomicCoordinates
 
-subroutine delaunayReduction( &
-    lattice_vectors, n_atom, atomic_coordinates, lattice_index, debug &
+subroutine calculateMetric( &
+    lattice_vectors, lattice_index, reduced_lattice_vectors, G, debug &
 )
-    integer, intent(in) :: n_atom
-    double precision, intent(inout) :: lattice_vectors(3,3), atomic_coordinates(3,n_atom)
+    double precision, intent(in) :: lattice_vectors(3,3)
     integer, intent(out) :: lattice_index(3)
+    double precision, intent(out) :: reduced_lattice_vectors(3,3), G(3,3)
     logical, intent(in) :: debug
 
     integer :: temp_i
     double precision :: a_sqr(3), temp_a, temp_lattice_vectors(3,3), scalar_product(3)
-    double precision, allocatable :: temp_atomic_coordinates(:,:)
     logical :: done
 
-    integer :: ir, i
+    integer :: ir, i, j
 
+    ! First use delaunay reduction
+    temp_lattice_vectors = lattice_vectors
     done = .false.
     lattice_index(1) = 1
     lattice_index(2) = 2
@@ -65,9 +85,9 @@ subroutine delaunayReduction( &
         ! Order lattice vectors so that a_1 <= a_2 <= a_3
         do i = 1, 3
             a_sqr(i) = &
-                lattice_vectors(1,lattice_index(i))*lattice_vectors(1,lattice_index(i)) + &
-                lattice_vectors(2,lattice_index(i))*lattice_vectors(2,lattice_index(i)) + &
-                lattice_vectors(3,lattice_index(i))*lattice_vectors(3,lattice_index(i))
+                temp_lattice_vectors(lattice_index(i),1)*temp_lattice_vectors(lattice_index(i),1) + &
+                temp_lattice_vectors(lattice_index(i),2)*temp_lattice_vectors(lattice_index(i),2) + &
+                temp_lattice_vectors(lattice_index(i),3)*temp_lattice_vectors(lattice_index(i),3)
         enddo
         if(a_sqr(2) .gt. a_sqr(3)) then
             temp_a = a_sqr(2)
@@ -96,43 +116,49 @@ subroutine delaunayReduction( &
 
         ! Make sure scalar product of lattice vectors are <= 0
         scalar_product(1) = &
-            lattice_vectors(1,lattice_index(1)) * lattice_vectors(1,lattice_index(2)) + &
-            lattice_vectors(2,lattice_index(1)) * lattice_vectors(2,lattice_index(2)) + &
-            lattice_vectors(3,lattice_index(1)) * lattice_vectors(3,lattice_index(2))
+            temp_lattice_vectors(lattice_index(1),1)*temp_lattice_vectors(lattice_index(2),1) + &
+            temp_lattice_vectors(lattice_index(1),2)*temp_lattice_vectors(lattice_index(2),2) + &
+            temp_lattice_vectors(lattice_index(1),3)*temp_lattice_vectors(lattice_index(2),3)
         scalar_product(2) = &
-            lattice_vectors(1,lattice_index(2)) * lattice_vectors(1,lattice_index(3)) + &
-            lattice_vectors(2,lattice_index(2)) * lattice_vectors(2,lattice_index(3)) + &
-            lattice_vectors(3,lattice_index(2)) * lattice_vectors(3,lattice_index(3))
+            temp_lattice_vectors(lattice_index(2),1)*temp_lattice_vectors(lattice_index(3),1) + &
+            temp_lattice_vectors(lattice_index(2),2)*temp_lattice_vectors(lattice_index(3),2) + &
+            temp_lattice_vectors(lattice_index(2),3)*temp_lattice_vectors(lattice_index(3),3)
         scalar_product(3) = &
-            lattice_vectors(1,lattice_index(3)) * lattice_vectors(1,lattice_index(1)) + &
-            lattice_vectors(2,lattice_index(3)) * lattice_vectors(2,lattice_index(1)) + &
-            lattice_vectors(3,lattice_index(3)) * lattice_vectors(3,lattice_index(1))
+            temp_lattice_vectors(lattice_index(3),1)*temp_lattice_vectors(lattice_index(1),1) + &
+            temp_lattice_vectors(lattice_index(3),2)*temp_lattice_vectors(lattice_index(1),2) + &
+            temp_lattice_vectors(lattice_index(3),3)*temp_lattice_vectors(lattice_index(1),3)
 
-        if(debug) write(6,*) "delaunayReduction: scalar product", scalar_product(:)
+        if(debug) write(6,*) "calculateMetric: scalar product"
+        if(debug) write(6,'(3f16.9)') scalar_product(:)
 
         if((scalar_product(1) .le. eps16) .and. &
            (scalar_product(2) .le. eps16) .and. &
            (scalar_product(3) .le. eps16)) done = .true.
 
-        if(debug) write(6,*) "delaunayReduction: done", done
+        if(debug) write(6,*) "calculateMetric: temp lattice vectors"
+        if(debug) write(6,'(3f16.9)') temp_lattice_vectors(lattice_index(1),1:3)
+        if(debug) write(6,'(3f16.9)') temp_lattice_vectors(lattice_index(2),1:3)
+        if(debug) write(6,'(3f16.9)') temp_lattice_vectors(lattice_index(3),1:3)
+
+        if(debug) write(6,*) "calculateMetric: done =", done
 
         if(.not. done) then
             if(maxloc(scalar_product,dim=1) .eq. 1) then
-                lattice_vectors(1:3,lattice_index(2)) = &
-                    lattice_vectors(1:3,lattice_index(2)) - &
-                        lattice_vectors(1:3,lattice_index(1))
+                temp_lattice_vectors(lattice_index(2),1:3) = &
+                    temp_lattice_vectors(lattice_index(2),1:3) - &
+                    temp_lattice_vectors(lattice_index(1),1:3)
             elseif(maxloc(scalar_product,dim=1) .eq. 2) then
-                lattice_vectors(1:3,lattice_index(3)) = &
-                    lattice_vectors(1:3,lattice_index(3)) - &
-                        lattice_vectors(1:3,lattice_index(2))
+                temp_lattice_vectors(lattice_index(3),1:3) = &
+                    temp_lattice_vectors(lattice_index(3),1:3) - &
+                    temp_lattice_vectors(lattice_index(2),1:3)
             elseif(maxloc(scalar_product,dim=1) .eq. 3) then
-                lattice_vectors(1:3,lattice_index(3)) = &
-                    lattice_vectors(1:3,lattice_index(3)) - &
-                        lattice_vectors(1:3,lattice_index(1))
+                temp_lattice_vectors(lattice_index(3),1:3) = &
+                    temp_lattice_vectors(lattice_index(3),1:3) - &
+                    temp_lattice_vectors(lattice_index(1),1:3)
             endif
         endif
 
-        if(done) return
+        if(done) exit
     enddo
 
     if(.not. done) then
@@ -140,18 +166,28 @@ subroutine delaunayReduction( &
         stop
     endif
 
-    ! Adjust lattice vectors and atomic coordinates accordingly
-    temp_lattice_vectors = lattice_vectors
+    ! Adjust lattice vectors accordingly
     do i = 1, 3
-        lattice_vectors(1:3,i) = temp_lattice_vectors(1:3,lattice_index(i))
+        reduced_lattice_vectors(i,1:3) = temp_lattice_vectors(lattice_index(i),1:3)
     enddo
-    allocate(temp_atomic_coordinates(3,n_atom))
-    temp_atomic_coordinates = atomic_coordinates
-    atomic_coordinates(1,1:n_atom) = temp_atomic_coordinates(lattice_index(1),1:n_atom)
-    atomic_coordinates(2,1:n_atom) = temp_atomic_coordinates(lattice_index(2),1:n_atom)
-    atomic_coordinates(3,1:n_atom) = temp_atomic_coordinates(lattice_index(3),1:n_atom)
-    deallocate(temp_atomic_coordinates)
 
-end subroutine delaunayReduction
+    ! Calculate metric G = B^TB
+    temp_lattice_vectors = G
+    do i = 1, 3
+        do j = 1, 3
+            G(i,j) = &
+                reduced_lattice_vectors(i,1) * reduced_lattice_vectors(j,1) + &
+                reduced_lattice_vectors(i,2) * reduced_lattice_vectors(j,2) + &
+                reduced_lattice_vectors(i,3) * reduced_lattice_vectors(j,3)
+        enddo
+    enddo
+    if(debug) then
+        write(6,*) "calculateMetric: G"
+        write(6,'(3f16.9)') G(1,1:3)
+        write(6,'(3f16.9)') G(2,1:3)
+        write(6,'(3f16.9)') G(3,1:3)
+    endif
+
+end subroutine calculateMetric
 
 end module structureinit_m
