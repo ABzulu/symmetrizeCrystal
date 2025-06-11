@@ -31,19 +31,19 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
             select case(trace)
             case(3)
                 W_type(iw) = 1
-                counter(10) = counter(10) + 1
+                counter(6) = counter(6) + 1
             case(-1)
                 W_type(iw) = 2
-                counter(9) = counter(9) + 1
+                counter(7) = counter(7) + 1
             case(0)
                 W_type(iw) = 3
                 counter(8) = counter(8) + 1
             case(1)
                 W_type(iw) = 4
-                counter(7) = counter(7) + 1
+                counter(8) = counter(8) + 1
             case(2)
                 W_type(iw) = 6
-                counter(6) = counter(6) + 1
+                counter(10) = counter(10) + 1
             end select
         elseif(determinant .eq. -1) then
             select case(trace)
@@ -68,16 +68,16 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
             stop
         endif
 
-        write(6,'(a,2i4)') "identifyCrystal: W index, W type = ", iw, W_type
+        write(6,'(a,2i4)') "identifyCrystal: W index, W type = ", iw, W_type(iw)
         if(debug) then
             do ix = 1, 3
-                write(6,'(3f16.9)') W(ix,1:3,iw)
+                write(6,'(3i4)') W(ix,1:3,iw)
             enddo
         endif
     enddo
 
-    write(6,'(a37,10i3)') "identifyCrystal: Type of W", -6, -4, -3, -2, -1, 1, 2, 3, 4, 6
-    write(6,'(a37,10i3)') "identifyCrystal: Numbers of type of W", counter(1:10)
+    write(6,'(a39,10i3)') "identifyCrystal: Type of W            |", -6, -4, -3, -2, -1, 1, 2, 3, 4, 6
+    write(6,'(a39,10i3)') "identifyCrystal: Numbers of type of W |", counter(1:10)
 
     if(.not. (counter(6) .eq. 1)) then
         write(6,'(a)') "identifyCrystal: Number of W with type 1 is not 1; Stopping program"
@@ -280,6 +280,8 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         write(6,'(a)') "identifyCrystal: No matching crystal type found; Stopping program"
         stop
     endif
+
+    write(6,'(a,a)') "identifyCrystal: Crystal type = ", crystal_type
 
 end subroutine identifyCrystal
 
