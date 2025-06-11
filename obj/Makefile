@@ -15,7 +15,8 @@ VPATH=${SRCDIR}:${SRCDIR}/fdf
 LDFLAGS=-L$(OBJDIR) -lfdf
 
 OBJECTS=inlineoptions_m.o input_m.o output_m.o m_getopts.o f2kcli.o \
-	calculatereciprocallattice_m.o structureinit_m.o symmetry_m.o identifyCrystal_m.o
+	calculatereciprocallattice_m.o structureinit_m.o symmetry_m.o identifyCrystal_m.o \
+	primitiveToConventional_m.o gcd_m.o
 FDF=libfdf.a
 
 all: $(MAINEXE)
@@ -36,6 +37,7 @@ calculatereciprocallattice_m.o:
 structureinit_m.o: constants.o calculatereciprocallattice_m.o
 symmetry_m.o:
 identifyCrystal_m.o:
+primitiveToConventional_m.o: constants.o gcd_m.o
 
 .PHONY: clean
 

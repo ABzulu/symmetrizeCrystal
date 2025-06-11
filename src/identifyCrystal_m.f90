@@ -40,7 +40,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
                 counter(8) = counter(8) + 1
             case(1)
                 W_type(iw) = 4
-                counter(8) = counter(8) + 1
+                counter(9) = counter(9) + 1
             case(2)
                 W_type(iw) = 6
                 counter(10) = counter(10) + 1
@@ -95,7 +95,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 0) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 0) .and. &
         (counter(8) .eq. 0) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     )  then
-        crystal_type = "Triclinic 1 bar"
+        crystal_type = "Triclinic 1_bar"
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 0) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 1) .and. &
@@ -143,7 +143,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 0) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 1) .and. &
         (counter(8) .eq. 0) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Tetragonal 4 bar"   
+        crystal_type = "Tetragonal 4_bar"   
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 2) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 1) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 1) .and. &
@@ -167,7 +167,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 2) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 3) .and. &
         (counter(8) .eq. 0) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Tetragonal 4 bar 2m" 
+        crystal_type = "Tetragonal 4_bar2m" 
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 2) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 5) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 5) .and. &
@@ -185,7 +185,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 0) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 0) .and. &
         (counter(8) .eq. 2) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Trigonal 3 bar" 
+        crystal_type = "Trigonal 3_bar" 
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 0) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 3) .and. &
@@ -203,7 +203,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 3) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 3) .and. &
         (counter(8) .eq. 2) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Trigonal 3 bar m" 
+        crystal_type = "Trigonal 3_barm" 
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 0) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 1) .and. &
@@ -215,7 +215,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 1) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 0) .and. &
         (counter(8) .eq. 2) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Hexagonal 6 bar" 
+        crystal_type = "Hexagonal 6_bar" 
     elseif( &
         (counter(1) .eq. 2) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 2) .and. &
         (counter(4) .eq. 1) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 1) .and. &
@@ -239,7 +239,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 4) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 3) .and. &
         (counter(8) .eq. 2) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Hexagonal 6 bar 2m" 
+        crystal_type = "Hexagonal 6_bar2m" 
     elseif( &
         (counter(1) .eq. 2) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 2) .and. &
         (counter(4) .eq. 7) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 7) .and. &
@@ -257,7 +257,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 3) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 3) .and. &
         (counter(8) .eq. 8) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Cubic m3 bar" 
+        crystal_type = "Cubic m3_bar" 
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 0) .and. (counter(3)  .eq. 0) .and. &
         (counter(4) .eq. 0) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 9) .and. &
@@ -269,13 +269,13 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         (counter(4) .eq. 6) .and. (counter(5) .eq. 0) .and. (counter(7)  .eq. 3) .and. &
         (counter(8) .eq. 8) .and. (counter(9) .eq. 0) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Cubic 4 bar 3m" 
+        crystal_type = "Cubic 4_bar3m" 
     elseif( &
         (counter(1) .eq. 0) .and. (counter(2) .eq. 6) .and. (counter(3)  .eq. 8) .and. &
         (counter(4) .eq. 9) .and. (counter(5) .eq. 1) .and. (counter(7)  .eq. 9) .and. &
         (counter(8) .eq. 8) .and. (counter(9) .eq. 6) .and. (counter(10) .eq. 0) &        
     ) then
-        crystal_type = "Cubic m3 bar m"
+        crystal_type = "Cubic m3_barm"
     else
         write(6,'(a)') "identifyCrystal: No matching crystal type found; Stopping program"
         stop

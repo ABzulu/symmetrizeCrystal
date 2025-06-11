@@ -109,11 +109,10 @@ subroutine findTranslationalSymmetry( &
     n_atom, atomic_coordinates, n_species, atomic_species_index, &
     atomic_tol, n_W, W, n_symm_op, symm_op, debug &
 )
-    integer, intent(in) :: &
-        n_atom, n_species, atomic_species_index(n_atom), n_W, W(3,3,48)
-    double precision, intent(in) :: &
-        atomic_coordinates(3,n_atom), atomic_tol
+    integer, intent(in) :: n_atom, n_species, atomic_species_index(n_atom)
+    double precision, intent(in) :: atomic_coordinates(3,n_atom), atomic_tol
     logical, intent(in) :: debug
+    integer, intent(inout) :: n_W, W(3,3,48)
     integer, intent(out) :: n_symm_op
     double precision, allocatable, intent(out) :: symm_op(:,:,:)
 
@@ -121,7 +120,7 @@ subroutine findTranslationalSymmetry( &
     integer, allocatable :: n_atom_per_species(:), W_index(:)
     double precision :: delta_x(3)
     double precision, allocatable :: candidate_translational_operator(:,:)
-    logical :: found_match
+    logical :: found_match, W_match(48)
     logical, allocatable :: is_symmetric(:)
 
     allocate(n_atom_per_species(n_species))
@@ -168,6 +167,7 @@ subroutine findTranslationalSymmetry( &
         enddo
     enddo
 
+    W_match(:) = .false.
     ! Check if the candidate translational operator maps all the atoms to the
     ! same species of atoms.
     if(debug) write(6,*) "findTranslationalSymmetry: delta_x"
@@ -206,8 +206,30 @@ subroutine findTranslationalSymmetry( &
             cycle
         else
             is_symmetric(ic) = .true.
+            if(.not. W_match(W_index(ic))) W_match(W_index(ic)) = .true.
         endif
     enddo
+
+    counter = 0
+    do iw = 1, n_W
+        if(W_match(iw)) then
+            counter = counter + 1
+            W(1:3,1:3,counter) = W(1:3,1:3,iw)
+        else
+            continue
+        endif
+    enddo
+    n_W = count(W_match)
+
+    if(debug) then
+        write(6,'(a,i4)') "findTranslationalSymmetry: After finding space group n_W = ", n_W
+        do iw = 1, n_W
+                write(6,'(a,i4)') "findTranslationalSymmetry: W index = ", iw 
+            do ix = 1, 3
+                write(6,'(3i4)') W(ix,1:3,iw)
+            enddo
+        enddo
+    endif
 
     n_symm_op = count(is_symmetric)
     allocate(symm_op(3,4,n_symm_op))

@@ -4,6 +4,7 @@ program symmetrizeCrystal
     use structureinit_m, only: restricAtomicCoordinates, calculateMetric
     use symmetry_m, only: findRotationalSymmetry, findTranslationalSymmetry
     use identifyCrystal_m, only: identifyCrystal
+    use primitiveToConventional_m, only: primitiveToConventional
     use output_m, only: writeOutput
 
     implicit none
@@ -20,7 +21,7 @@ program symmetrizeCrystal
 
     character(132) :: crystal_type
     integer :: lattice_index(3), W(3,3,48), n_W, n_symm_op, W_type(48)
-    double precision :: reduced_lattice_vectors(3,3), G(3,3)
+    double precision :: reduced_lattice_vectors(3,3), conventional_lattice_vectors(3,3), G(3,3)
     double precision, allocatable :: symm_op(:,:,:)
 
     ! Read in command line options and inputs
@@ -57,6 +58,9 @@ program symmetrizeCrystal
     if(debug) write(6,*) "Checkpoint: Find symmetry"
 
     call identifyCrystal(W, n_W, W_type, crystal_type, debug)
+    call primitiveToConventional( &
+        crystal_type, W, n_W, debug &
+    )
 
     if(debug) write(6,'(a)') "Checkpoint: Identify symmetry group"
 
