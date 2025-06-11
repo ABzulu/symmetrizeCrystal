@@ -10,21 +10,23 @@ module input_m
 contains
 
 subroutine readInput( &
-        lattice_constant, lattice_vector, &
-        n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index &
+        input_filename, lattice_constant, lattice_vector, &
+        n_atom, atomic_coordinates_format, atomic_coordinates, &
+        n_species, atomic_species_index &
 )
     use fdf, only: &
         fdf_init, fdf_block, fdf_double, fdf_integer, fdf_physical, fdf_string
 
+    character(132), intent(in) :: input_filename
     character(132), intent(out) :: atomic_coordinates_format 
-    integer, intent(out) :: n_atom
+    integer, intent(out) :: n_atom, n_species
     integer, allocatable, intent(out) :: atomic_species_index(:)
     double precision, intent(out) :: lattice_constant, lattice_vector(3,3)
     double precision, allocatable, intent(out) :: atomic_coordinates(:,:)
 
     integer :: i, ia, iounit
 
-    call fdf_init('input.fdf', 'input.fdf.tmp')
+    call fdf_init(input_filename, 'input.fdf.tmp')
 
     ! This automatically changes the units of lattice constant to Bohr
     lattice_constant = fdf_physical('LatticeConstant',0.d0,'Bohr')
@@ -38,6 +40,11 @@ subroutine readInput( &
     n_atom = fdf_integer('NumberOfAtoms',0)
     if(n_atom .eq. 0) then
         write(6,*) "Number of atoms = 0; Stopping program"
+        stop
+    endif
+    n_species = fdf_integer('NumberOfSpecies',0)
+    if(n_species .eq. 0) then
+        write(6,*) "Number of species = 0; Stopping program"
         stop
     endif
 

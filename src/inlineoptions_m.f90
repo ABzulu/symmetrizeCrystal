@@ -9,17 +9,17 @@ module inlineoptions_m
 
 contains
 
-subroutine getInlineOptions(lattice_tol, atomic_tol, output_filename, debug)
+subroutine getInlineOptions(lattice_tol, atomic_tol, input_filename, output_filename, debug)
     double precision, intent(out) :: lattice_tol, atomic_tol
-    character(len=132), intent(out) :: output_filename
+    character(len=132), intent(out) :: input_filename, output_filename
     logical, intent(out) :: debug 
 
-    integer :: nopts, iostat, nargs, nlabels, exst
+    integer :: nopts, iostat, nargs, nlabels
     character(len=132) :: optArg
     character(len=8) :: optName
     logical, external :: makedirqq
 
-    lattice_tol = 1.0d0
+    lattice_tol = 1.0d-3
     atomic_tol = 1.0d-5
     output_filename = "symmetrizedStructure.out"
     debug = .false.
@@ -45,18 +45,26 @@ subroutine getInlineOptions(lattice_tol, atomic_tol, output_filename, debug)
     
     nargs = command_argument_count()
     nlabels = nargs - nopts + 1
-    if( nlabels /= 0) then
+    if( nlabels /= 1) then
         print *, 'Use -h option for manual'
         print *, ''
         call manual()
         stop
     endif
 
+    call get_command_argument(nopts,value=input_filename,status=iostat)
+    input_filename = trim(input_filename)
+    if(iostat /= 0) then
+      stop 'Cannot get INPUT file'
+    endif
+
 end subroutine getInlineOptions
 
 subroutine manual()
     print *, '----------------------------------------------------------------'
-    print *, '  Usage: symmetrizeCrystal [OPTIONS]'
+    print *, '  Usage: symmetrizeCrystal [OPTIONS] [INPUT]'
+    print *, '  '
+    print *, '  INPUT         SIESTA input filename'
     print *, '  '
     print *, '  options: '
     print *, '  '

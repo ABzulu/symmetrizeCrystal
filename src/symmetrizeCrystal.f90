@@ -3,31 +3,36 @@ program symmetrizeCrystal
     use input_m, only: readInput, formatInput
     use structureinit_m, only: restricAtomicCoordinates, calculateMetric
     use symmetry_m, only: findRotationalSymmetry, findTranslationalSymmetry
+    use identifyCrystal_m, only: identifyCrystal
     use output_m, only: writeOutput
 
     implicit none
 
     logical :: debug
 
-    character(132) :: atomic_coordinates_format, output_filename
-    integer :: n_atom
+    character(132) :: &
+        atomic_coordinates_format, input_filename, output_filename
+    integer :: n_atom, n_species
     integer, allocatable :: atomic_species_index(:)
     double precision :: &
         lattice_constant, lattice_vectors(3,3), lattice_tol, atomic_tol
     double precision, allocatable :: atomic_coordinates(:,:)
 
-    integer :: lattice_index(3), n_W, n_symm_op
+    character(132) :: crystal_type
+    integer :: lattice_index(3), W(3,3,48), n_W, n_symm_op, W_type(48)
     double precision :: reduced_lattice_vectors(3,3), G(3,3)
     double precision, allocatable :: symm_op(:,:,:)
-    integer :: W(3,3,192) ! Rotational matrices
 
     ! Read in command line options and inputs
-    call getInlineOptions(lattice_tol, atomic_tol, output_filename, debug)
+    call getInlineOptions( &
+        lattice_tol, atomic_tol, input_filename, output_filename, debug &
+    )
 
     ! Read in input.fdf for structure parameters
     call readInput( &
-        lattice_constant, lattice_vectors, &
-        n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index &
+        input_filename, lattice_constant, lattice_vectors, &
+        n_atom, atomic_coordinates_format, atomic_coordinates,&
+        n_species, atomic_species_index &
     )
     ! Change atomic coordinates to Bohr
     ! This is here because the lattice vectors are automatically transformed to Bohr
@@ -45,11 +50,15 @@ program symmetrizeCrystal
     call findRotationalSymmetry(G, lattice_tol, W, n_W, debug)
     ! Atomic coordinates are changed to fractional between -0.5 < x <= 0.5
     call findTranslationalSymmetry( &
-        n_atom, atomic_coordinates, atomic_species_index, atomic_tol,&
-        n_W, W, n_symm_op, symm_op, debug &
+        n_atom, atomic_coordinates, n_species, atomic_species_index, & 
+        atomic_tol, n_W, W, n_symm_op, symm_op, debug &
     )
 
     if(debug) write(6,*) "Checkpoint: Find symmetry"
+
+    call identifyCrystal(W, n_W, W_type, crystal_type, debug)
+
+    if(debug) write(6,'(a)') "Checkpoint: Identify symmetry group"
 
     call writeOutput( &
         lattice_constant, lattice_vectors, &

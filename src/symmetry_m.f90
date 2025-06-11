@@ -11,7 +11,7 @@ contains
 
 subroutine findRotationalSymmetry(G, lattice_error, W, n_W, debug)
     double precision, intent(in) :: G(3,3), lattice_error
-    integer, intent(out) :: W(3,3,192)
+    integer, intent(out) :: W(3,3,48)
     integer, intent(out) :: n_W
     logical, intent(in) :: debug
 
@@ -89,7 +89,7 @@ subroutine findRotationalSymmetry(G, lattice_error, W, n_W, debug)
            (maxval(off_diag) .gt. lattice_error)) cycle
 
         n_W = n_W + 1
-        if(n_W .gt. 192) then
+        if(n_W .gt. 48) then
             write(6,*) "findRotationalSymmetry: Too many symmetry operations"
             stop
         endif
@@ -106,26 +106,39 @@ subroutine findRotationalSymmetry(G, lattice_error, W, n_W, debug)
 end subroutine findRotationalSymmetry
 
 subroutine findTranslationalSymmetry( &
-    n_atom, atomic_coordinates, atomic_species_index, atomic_tol, &
-    n_W, W, n_symm_op, symm_op, debug &
+    n_atom, atomic_coordinates, n_species, atomic_species_index, &
+    atomic_tol, n_W, W, n_symm_op, symm_op, debug &
 )
     integer, intent(in) :: &
-        n_atom, atomic_species_index(n_atom), n_W, W(3,3,192)
+        n_atom, n_species, atomic_species_index(n_atom), n_W, W(3,3,48)
     double precision, intent(in) :: &
         atomic_coordinates(3,n_atom), atomic_tol
     logical, intent(in) :: debug
     integer, intent(out) :: n_symm_op
     double precision, allocatable, intent(out) :: symm_op(:,:,:)
 
-    integer :: n_candidates, ia, ja, iw, ix, counter, ic
-    integer, allocatable :: W_index(:)
+    integer :: is, n_candidates, ia, ja, iw, ix, counter, ic
+    integer, allocatable :: n_atom_per_species(:), W_index(:)
     double precision :: delta_x(3)
     double precision, allocatable :: candidate_translational_operator(:,:)
     logical :: found_match
     logical, allocatable :: is_symmetric(:)
 
-    !!! need to change this so that it takes into acount the species.
-    n_candidates = n_atom * n_atom * n_W
+    allocate(n_atom_per_species(n_species))
+    n_atom_per_species(:) = 0
+    do is = 1, n_species
+        do ia = 1, n_atom
+            if(atomic_species_index(ia) .eq. is) &
+                n_atom_per_species(is) = n_atom_per_species(is) + 1
+        enddo
+    enddo
+
+    n_candidates = 0
+    do is = 1, n_species
+        n_candidates = &
+            n_candidates + n_atom_per_species(is)*n_atom_per_species(is)
+    enddo
+    n_candidates = n_candidates * n_W
     allocate(candidate_translational_operator(3,n_candidates), is_symmetric(n_candidates))
     allocate(W_index(n_candidates))
 
@@ -208,17 +221,16 @@ subroutine findTranslationalSymmetry( &
         enddo
     enddo
 
-    if(debug) write(6,*) "findTranslationalSymmetry: n_symm_op =", n_symm_op
-    if(debug) write(6,*) "findTranslationalSymmetry: symm_op"
-    if(debug) then
-        do ic = 1, n_symm_op
-            write(6,*) "symmetry operator index", ic
-            write(6,'(4f16.8)') symm_op(1,1:4,ic) 
-            write(6,'(4f16.8)') symm_op(2,1:4,ic) 
-            write(6,'(4f16.8)') symm_op(3,1:4,ic) 
-        enddo
-    endif
+    write(6,*) "findTranslationalSymmetry: n_symm_op =", n_symm_op
+    write(6,*) "findTranslationalSymmetry: symm_op"
+    do ic = 1, n_symm_op
+        write(6,*) "symmetry operator index", ic
+        write(6,'(4f16.8)') symm_op(1,1:4,ic) 
+        write(6,'(4f16.8)') symm_op(2,1:4,ic) 
+        write(6,'(4f16.8)') symm_op(3,1:4,ic) 
+    enddo
 
+    deallocate(n_atom_per_species)
     deallocate(candidate_translational_operator, is_symmetric)
     deallocate(W_index)
 
