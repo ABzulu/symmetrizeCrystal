@@ -114,7 +114,7 @@ subroutine findTranslationalSymmetry( &
     logical, intent(in) :: debug
     integer, intent(inout) :: n_W, W(3,3,48)
     integer, intent(out) :: n_symm_op
-    double precision, allocatable, intent(out) :: symm_op(:,:,:)
+    integer, intent(out) :: symm_op(3,4,192)
 
     integer :: is, n_candidates, ia, ja, iw, ix, counter, ic
     integer, allocatable :: n_atom_per_species(:), W_index(:)
@@ -232,14 +232,20 @@ subroutine findTranslationalSymmetry( &
     endif
 
     n_symm_op = count(is_symmetric)
-    allocate(symm_op(3,4,n_symm_op))
+    if(n_symm_op .gt. 192) then
+        write(6,'(a)') "findTranslationalSymmetry: Too many symmetry operators found"
+        write(6,'(a,i7)') "findTranslationalSymmetry: Number of symmetry operators = ", n_symm_op
+        stop
+    endif
+
     counter = 0
     do ic = 1, n_candidates
         if(.not. is_symmetric(ic)) cycle
         counter = counter + 1
+        if(debug) write(6,'(a,i4)') "findTranslationalSymmetry: W index = ", W_index(ic)
         do ix = 1, 3
             symm_op(ix,1:3,counter) = W(ix,1:3,W_index(ic))
-            symm_op(ix,4,counter) = candidate_translational_operator(ix,counter)
+            symm_op(ix,4,counter) = nint(12.d0*candidate_translational_operator(ix,counter))
         enddo
     enddo
 
@@ -247,9 +253,9 @@ subroutine findTranslationalSymmetry( &
     write(6,*) "findTranslationalSymmetry: symm_op"
     do ic = 1, n_symm_op
         write(6,*) "symmetry operator index", ic
-        write(6,'(4f16.8)') symm_op(1,1:4,ic) 
-        write(6,'(4f16.8)') symm_op(2,1:4,ic) 
-        write(6,'(4f16.8)') symm_op(3,1:4,ic) 
+        write(6,'(4i4)') symm_op(1,1:4,ic) 
+        write(6,'(4i4)') symm_op(2,1:4,ic) 
+        write(6,'(4i4)') symm_op(3,1:4,ic) 
     enddo
 
     deallocate(n_atom_per_species)

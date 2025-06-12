@@ -1,5 +1,5 @@
 module structureinit_m
-    use constants, only: eps16
+    use constants, only: eps16, eps6
     use calculatereciprocallattice_m, only: calculateReciprocalLattice
 
     implicit none
@@ -89,7 +89,7 @@ subroutine calculateMetric( &
                 temp_lattice_vectors(lattice_index(i),2)*temp_lattice_vectors(lattice_index(i),2) + &
                 temp_lattice_vectors(lattice_index(i),3)*temp_lattice_vectors(lattice_index(i),3)
         enddo
-        if(a_sqr(2) .gt. a_sqr(3)) then
+        if(abs(a_sqr(2) - a_sqr(3)) .gt. eps6) then
             temp_a = a_sqr(2)
             a_sqr(2) = a_sqr(3)
             a_sqr(3) = temp_a
@@ -97,7 +97,7 @@ subroutine calculateMetric( &
             lattice_index(2) = lattice_index(3)
             lattice_index(3) = temp_i
         endif
-        if(a_sqr(1) .gt. a_sqr(2)) then
+        if(abs(a_sqr(1) - a_sqr(2)) .gt. eps6) then
             temp_a = a_sqr(1)
             a_sqr(1) = a_sqr(2)
             a_sqr(2) = temp_a
@@ -105,7 +105,7 @@ subroutine calculateMetric( &
             lattice_index(1) = lattice_index(2)
             lattice_index(2) = temp_i
         endif
-        if(a_sqr(2) .gt. a_sqr(3)) then
+        if(abs(a_sqr(2) - a_sqr(3)) .gt. eps6) then
             temp_a = a_sqr(2)
             a_sqr(2) = a_sqr(3)
             a_sqr(3) = temp_a

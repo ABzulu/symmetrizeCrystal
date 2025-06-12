@@ -5,6 +5,8 @@ program symmetrizeCrystal
     use symmetry_m, only: findRotationalSymmetry, findTranslationalSymmetry
     use identifyCrystal_m, only: identifyCrystal
     use primitiveToConventional_m, only: primitiveToConventional
+    use identifySpaceGroup_m, only: identifySpaceGroup
+    use spacegroup_db, only: loadInSpaceGroup
     use output_m, only: writeOutput
 
     implicit none
@@ -20,9 +22,14 @@ program symmetrizeCrystal
     double precision, allocatable :: atomic_coordinates(:,:)
 
     character(132) :: crystal_type
-    integer :: lattice_index(3), W(3,3,48), n_W, n_symm_op, W_type(48)
-    double precision :: reduced_lattice_vectors(3,3), conventional_lattice_vectors(3,3), G(3,3)
-    double precision, allocatable :: symm_op(:,:,:)
+    integer :: &
+        lattice_index(3), W(3,3,48), n_W, &
+        n_symm_op, symm_op(3,4,192), W_type(48), M(3,3)
+    double precision :: reduced_lattice_vectors(3,3), G(3,3)
+
+    integer :: &
+        n_ops(530), rotations(3,3,192,530), translations(3,192,530)
+    character(len=17) :: hall_symbol(530)
 
     ! Read in command line options and inputs
     call getInlineOptions( &
@@ -58,8 +65,13 @@ program symmetrizeCrystal
     if(debug) write(6,*) "Checkpoint: Find symmetry"
 
     call identifyCrystal(W, n_W, W_type, crystal_type, debug)
-    call primitiveToConventional( &
-        crystal_type, W, n_W, debug &
+    ! call primitiveToConventional( &
+    !     crystal_type, W, n_W, M, debug &
+    ! )
+    call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
+    call identifySpaceGroup( &
+        symm_op, n_symm_op, M, &
+        n_ops, rotations, translations, hall_symbol, debug &
     )
 
     if(debug) write(6,'(a)') "Checkpoint: Identify symmetry group"

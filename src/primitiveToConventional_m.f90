@@ -11,15 +11,16 @@ module primitiveToConventional_m
 contains
 
 subroutine primitiveToConventional( &
-    crystal_type, W, n_W, debug &
+    crystal_type, W, n_W, M, debug &
 )
     character(len=132), intent(in) :: crystal_type
     integer, intent(in) :: W(3,3,48), n_W
     logical, intent(in) :: debug
+    integer, intent(out) :: M(3,3)
 
     character(len=132) :: junk, crystal_class
     integer :: &
-        in, ix, jx, kx, M(3,3), primary_W_index, S(3,3), copy_W(3,3,48), &
+        in, ix, jx, kx, primary_W_index, S(3,3), copy_W(3,3,48), &
         temp_W(3,3), temp_S(3,3), test_e(3), determinant, correction_matrix(3,3)
     double precision :: obv_M(3,3), rev_M(3,3), dbl_M(3,3), temp_dbl_M(3,3)
     logical :: found_e, is_int
@@ -514,6 +515,11 @@ subroutine primitiveToConventional( &
         endif
 
         if((crystal_class .eq. 'mmm')) then
+            if(debug) then
+                write(6,'(3i4)') M(1,1:3)
+                write(6,'(3i4)') M(2,1:3)
+                write(6,'(3i4)') M(3,1:3)
+            endif
             if( .not. (determinant .eq. 2)) then
                 write(6,'(a)') "primitiveToConventional: Determinant of M is not 2 when it should be"        
                 write(6,'(a)') "primitiveToConventional: Stopping program"
@@ -764,6 +770,20 @@ subroutine findPrimaryAxis(W, n_W, order, primary_axis, primary_W_index, debug)
                 W(3,2,iw) - W(2,3,iw), &
                 W(1,3,iw) - W(3,1,iw), &
                 W(2,1,iw) - W(1,2,iw) ]
+            ! Rotation is identity or pi
+            if(all(temp_M(1:3) .eq. 0)) then
+                temp_M(:) = 0
+                if((W(1,1,iw) .eq. 1) .and. (W(2,2,iw) .eq. 1) .and. (W(3,3,iw) .eq. 1)) then
+                    temp_M(1:3) = [0, 0, 1]
+                else
+                    do ix = 1, 3
+                        if(W(ix,ix,iw) .eq. 1) then
+                            temp_M(ix) = 1
+                            exit
+                        endif
+                    enddo
+                endif
+            endif
             temp_M(1:3) = temp_M(1:3) / gcd(gcd(abs(temp_M(1)),abs(temp_M(2))),abs(temp_M(3)))
             if((.not.(temp_M(1) .eq. 0)) .or. (.not.(primary_axis(1) .eq. 0))) then
                 if(abs(temp_M(1)) .gt. abs(primary_axis(1))) then
@@ -802,6 +822,19 @@ subroutine findPrimaryAxis(W, n_W, order, primary_axis, primary_W_index, debug)
                 W(3,2,iw) - W(2,3,iw), &
                 W(1,3,iw) - W(3,1,iw), &
                 W(2,1,iw) - W(1,2,iw) ]
+            if(all(primary_axis(1:3) .eq. 0)) then
+                primary_axis(:) = 0
+                if((W(1,1,iw) .eq. 1) .and. (W(2,2,iw) .eq. 1) .and. (W(3,3,iw) .eq. 1)) then
+                    primary_axis(1:3) = [0, 0, 1]
+                else
+                    do ix = 1, 3
+                        if(W(ix,ix,iw) .eq. 1) then
+                            primary_axis(ix) = 1
+                            exit
+                        endif
+                    enddo
+                endif
+            endif
             primary_axis(1:3) = &
                 primary_axis(1:3) / &
                 gcd(gcd(abs(primary_axis(1)),abs(primary_axis(2))),abs(primary_axis(3)))    
