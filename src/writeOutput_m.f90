@@ -85,7 +85,7 @@ subroutine writeOutput( &
                 reciprocal_lattice_vector(i,2) * temp_a(2) + &
                 reciprocal_lattice_vector(i,3) * temp_a(3)
             temp_atomic_coordinates(i,ia) = &
-                modulo(temp_atomic_coordinates(i,ia),1.d0)
+                modulo(temp_atomic_coordinates(i,ia), 1.d0)
             ! This is to take care of exactly 1.0d0 
             if( temp_atomic_coordinates(i,ia) - 1.0d0 .gt. eps16) then
                 temp_atomic_coordinates(i,ia) = 0.0d0
