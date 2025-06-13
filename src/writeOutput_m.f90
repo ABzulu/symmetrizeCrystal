@@ -42,6 +42,15 @@ subroutine writeOutput( &
 
     temp_atomic_coordinates(:,:) = temp_atomic_coordinates(:,:) + 0.5d0
 
+    write(6,'(a)') "writeOutput: Reduced lattice vectors"
+    write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
+    write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
+    write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
+    write(6,'(a)') "writeOutput: Atomic coordinates in fractional coordinates"
+    do ia = 1, n_atom
+        write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
+    enddo
+
     ! Change the coordinates in Bohr
     do ia = 1, n_atom
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
