@@ -23,7 +23,7 @@ subroutine symmetrize_vector(n_symm_op, symm_op, vector, debug)
             projected_vector(ix) = &
                 symm_op(ix,1,io) * vector(1) + &
                 symm_op(ix,2,io) * vector(2) + &
-                symm_op(ix,3,io) * vector(3) - &
+                symm_op(ix,3,io) * vector(3) + &
                 symm_op(ix,4,io)
         enddo
 
