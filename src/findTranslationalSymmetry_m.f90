@@ -17,8 +17,7 @@ subroutine findTranslationalSymmetry( &
     double precision, intent(in) :: atomic_coordinates(3,n_atom), atomic_tol
     logical, intent(in) :: debug
     integer, intent(inout) :: n_W, W(3,3,48)
-    integer, intent(out) :: n_symm_op
-    integer, intent(out) :: symm_op(3,4,192)
+    integer, intent(out) :: n_symm_op, symm_op(3,4,192)
 
     integer :: is, n_candidates, ia, ja, iw, ix, counter, ic
     integer, allocatable :: n_atom_per_species(:), W_index(:)

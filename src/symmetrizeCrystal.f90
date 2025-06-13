@@ -69,7 +69,7 @@ program symmetrizeCrystal
         crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
     )
 
-    call restricAtomicCoordinates(reduced_lattice_vectors, n_atom, atomic_coordinates, debug)
+    call restricAtomicCoordinates(ITA_lattice_vectors, n_atom, atomic_coordinates, debug)
 
     call findTranslationalSymmetry( &
         n_atom, atomic_coordinates, n_species, atomic_species_index, & 
@@ -77,7 +77,7 @@ program symmetrizeCrystal
     )
 
     call findDuplicateTranslations( &
-        reduced_lattice_vectors, symm_op, n_symm_op, debug &
+        ITA_lattice_vectors, symm_op, n_symm_op, debug &
     )
 
     call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
@@ -100,7 +100,7 @@ program symmetrizeCrystal
     call writeOutput( &
         lattice_constant, lattice_vectors, &
         n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index, &
-        reduced_lattice_vectors, output_filename &
+        ITA_lattice_vectors, output_filename &
     )
 
     ! Deallocate all allocatable arrays
