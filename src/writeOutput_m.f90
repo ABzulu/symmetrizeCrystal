@@ -62,6 +62,11 @@ subroutine writeOutput( &
         enddo
     enddo
 
+    write(6,'(a)') "writeOutput: Atomic coordinates in Bohr"
+    do ia = 1, n_atom
+        write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
+    enddo    
+
     ! Change the coordinates in Fractional w.r.t input lattice vectors
     call calculateReciprocalLattice( &
         lattice_vector, reciprocal_lattice_vector, 0 &
