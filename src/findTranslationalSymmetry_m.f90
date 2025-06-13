@@ -77,6 +77,21 @@ subroutine findTranslationalSymmetry( &
     if(debug) write(6,*) "findTranslationalSymmetry: delta_x"
     is_symmetric(:) = .false.
     do ic = 1, n_candidates
+        if(debug) then
+            if( &
+                (W(1,1,W_index(ic)) .eq. 1) .and. &
+                (W(2,2,W_index(ic)) .eq. 1) .and. &
+                (W(3,3,W_index(ic)) .eq. 1) .and. &
+                (W(1,2,W_index(ic)) .eq. 0) .and. &
+                (W(2,1,W_index(ic)) .eq. 0) .and. &
+                (W(1,3,W_index(ic)) .eq. 0) .and. &
+                (W(3,1,W_index(ic)) .eq. 0) .and. &
+                (W(2,3,W_index(ic)) .eq. 0) .and. &
+                (W(3,2,W_index(ic)) .eq. 0) &
+            ) then
+                write(6,'(a,3f16.9)') "Candidate translation operator", candidate_translational_operator(1:3,ic)
+            endif
+        endif
         do ia = 1, n_atom
             found_match = .false.
             do ja = 1, n_atom
@@ -92,23 +107,6 @@ subroutine findTranslationalSymmetry( &
 
                     delta_x(ix) = abs(delta_x(ix) - atomic_coordinates(ix,ja))
                 enddo
-
-                if(debug) then
-                    if( &
-                        (W(1,1,W_index(ic)) .eq. 1) .and. &
-                        (W(2,2,W_index(ic)) .eq. 1) .and. &
-                        (W(3,3,W_index(ic)) .eq. 1) .and. &
-                        (W(1,2,W_index(ic)) .eq. 0) .and. &
-                        (W(2,1,W_index(ic)) .eq. 0) .and. &
-                        (W(1,3,W_index(ic)) .eq. 0) .and. &
-                        (W(3,1,W_index(ic)) .eq. 0) .and. &
-                        (W(2,3,W_index(ic)) .eq. 0) .and. &
-                        (W(3,2,W_index(ic)) .eq. 0) &
-                    ) then
-                        write(6,'(3f16.9)') candidate_translational_operator(1:3,ic)
-                        write(6,'(3f16.9)') delta_x(1:3)
-                    endif
-                endif
 
                 if(debug) write(6,'(a,3i6,3f16.9)') &
                     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
