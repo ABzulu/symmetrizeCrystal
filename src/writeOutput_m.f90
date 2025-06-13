@@ -32,7 +32,7 @@ subroutine writeOutput( &
 
     write(iounit,'(a)') "%block    LatticeVectors"
     do i = 1,3
-        write(iounit,'(3f16.10)') lattice_vector(1:3,i)/lattice_constant
+        write(iounit,'(3f16.10)') lattice_vector(i,1:3)/lattice_constant
     enddo
     write(iounit,'(a)') "%endlock  LatticeVectors"
 
@@ -70,9 +70,9 @@ subroutine writeOutput( &
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
         do i = 1, 3
             temp_atomic_coordinates(i,ia) = &
-                reciprocal_lattice_vector(1,i) * temp_a(1) + &
-                reciprocal_lattice_vector(2,i) * temp_a(2) + &
-                reciprocal_lattice_vector(3,i) * temp_a(3)
+                reciprocal_lattice_vector(i,1) * temp_a(1) + &
+                reciprocal_lattice_vector(i,2) * temp_a(2) + &
+                reciprocal_lattice_vector(i,3) * temp_a(3)
             temp_atomic_coordinates(i,ia) = &
                 modulo(temp_atomic_coordinates(i,ia),1.d0)
             ! This is to take care of exactly 1.0d0 
