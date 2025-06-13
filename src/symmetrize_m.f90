@@ -54,6 +54,12 @@ subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
                 symm_op(ix,2,io) * temp_matrix(jx,2) + &
                 symm_op(ix,3,io) * temp_matrix(jx,3)
         enddo;enddo
+        if(debug) then
+            write(6,'(a,i4)') "writeOutput: Projected matrix to operator index", io
+            write(6,'(3f16.9)') projected_matrix(1,1:3)
+            write(6,'(3f16.9)') projected_matrix(2,1:3)
+            write(6,'(3f16.9)') projected_matrix(3,1:3)
+        endif
 
         symmetric_matrix(1:3,1:3) = &
             symmetric_matrix(1:3,1:3) + projected_matrix(1:3,1:3) 
