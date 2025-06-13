@@ -90,8 +90,9 @@ subroutine findTranslationalSymmetry( &
                             candidate_translational_operator(ix,ic) - &
                             atomic_coordinates(ix,ja) + 0.5d0, &
                             1.d0 &
-                        ) - 0.5d0&
-                    )                       
+                        ) - 0.5d0 &
+                    )
+                    if(debug) write(6,'(i6, 3f16.9)') ic, delta_x                  
                 enddo
                 if(debug) write(6,'(a,3i6,3f16.9)') &
                     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
