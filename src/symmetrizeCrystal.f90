@@ -89,9 +89,6 @@ program symmetrizeCrystal
 
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
-    call symmetrize_matrix( &
-        n_symm_op, symm_op, reduced_lattice_vectors, debug &
-    )
     do ia = 1, n_atom
         call symmetrize_vector( &
             n_symm_op, symm_op, atomic_coordinates(1:3,ia), debug &
