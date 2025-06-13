@@ -112,6 +112,7 @@ subroutine findTranslationalSymmetry( &
                     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
                 if(maxval(delta_x) .lt. atomic_tol) then
                     found_match = .true.
+                    write(6,'(a)') "Found matching atoms"
                     exit
                 endif
             enddo
