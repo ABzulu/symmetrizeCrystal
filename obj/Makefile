@@ -14,7 +14,7 @@ IFLAGS+= -I$(OBJDIR)
 VPATH=${SRCDIR}:${SRCDIR}/fdf
 LDFLAGS=-L$(OBJDIR) -lfdf
 
-OBJECTS=inlineoptions_m.o input_m.o m_getopts.o f2kcli.o \
+OBJECTS=inlineoptions_m.o input_m.o f2kcli.o m_getopts.o  \
 	calculatereciprocallattice_m.o niggliReduction_m.o findRotationalSymmetry_m.o \
 	identifyCrystal_m.o toITAConventionalCell_m.o restricAtomicCoordinates_m.o \
 	findTranslationalSymmetry_m.o spacegroup_db.o identifySpaceGroup_m.o \
@@ -28,7 +28,7 @@ $(MAINEXE): $(OBJECTS) $(MAINMOD)
 		$(MAINMOD) $(IFLAGS) $(FCFLAGS) $(LDFLAGS) $(OBJECTS) $(LIBS) $(FDF)
 
 inlineoptions_m.o: m_getopts.o
-m_getopts: f2kcli.o
+m_getopts.o: f2kcli.o
 f2kcli.o:
 input_m.o: $(FDF) constants.o
 $(FDF):
