@@ -36,19 +36,19 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
         endif
 
         ! Force a_1 <= a_2 <= a_3
-        if(abs(G(2,2) - G(3,3)) .gt. eps6) then
+        if(G(2,2) - G(3,3) .gt. eps6) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 1"
             temp_array(1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = reduced_lattice_vectors(3,1:3)
             reduced_lattice_vectors(3,1:3) = temp_array(1:3)
         endif
-        if(abs(G(1,1) - G(2,2)) .gt. eps6) then
+        if(G(1,1) - G(2,2) .gt. eps6) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 2"
             temp_array(1:3) = reduced_lattice_vectors(1,1:3)
             reduced_lattice_vectors(1,1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = temp_array(1:3)
         endif
-        if(abs(G(2,2) - G(3,3)) .gt. eps6) then
+        if(G(2,2) - G(3,3) .gt. eps6) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 3"
             temp_array(1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = reduced_lattice_vectors(3,1:3)
