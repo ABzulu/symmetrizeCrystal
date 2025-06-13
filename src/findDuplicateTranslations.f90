@@ -51,17 +51,26 @@ subroutine findDuplicateTranslations( &
                                 jx * lattice_vectors(2,iix) + &
                                 kx * lattice_vectors(3,iix)
                         enddo
-                    if( &
-                        (dble(delta_t(1))/12.d0 .eq. lattice_translation(1)) .and. &
-                        (dble(delta_t(2))/12.d0 .eq. lattice_translation(2)) .and. &
-                        (dble(delta_t(3))/12.d0 .eq. lattice_translation(3)) &
-                    ) then
-                        if(debug) then
-                            write(6,'(a)') "findDuplicateTranslations: Equivalent translation found for"
-                            write(6,'(a,i4,a,i4)') "findDuplicateTranslations: ", io, " and ", jo
-                        endif
 
-                        filter(jo) = .false.
+                        if( &
+                            (dble(delta_t(1))/12.d0 .eq. lattice_translation(1)) .and. &
+                            (dble(delta_t(2))/12.d0 .eq. lattice_translation(2)) .and. &
+                            (dble(delta_t(3))/12.d0 .eq. lattice_translation(3)) &
+                        ) then
+                            if(debug) then
+                                write(6,'(a)') "findDuplicateTranslations: Equivalent translation found for"
+                                write(6,'(a,i4,a,i4)') "findDuplicateTranslations: ", io, " and ", jo
+                            endif
+
+                            if( &
+                                (symm_op(1,4,jo) .eq. 0) .and. &
+                                (symm_op(2,4,jo) .eq. 0) .and. &
+                                (symm_op(3,4,jo) .eq. 0) &
+                            ) then
+                                filter(io) = .false.
+                            else
+                                filter(jo) = .false.
+                            endif
                         endif
                     enddo
                     if(.not. filter(jo)) exit
