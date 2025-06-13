@@ -55,6 +55,10 @@ subroutine readInput( &
         enddo
     endif
 
+    do ia = 1, n_atom
+        write(6,'(3f16.9,i4)') atomic_coordinates(1:3,ia), atomic_species_index(ia)
+    enddo 
+
 end subroutine readInput
 
 subroutine formatInput( &
