@@ -87,11 +87,12 @@ subroutine writeOutput( &
         continue
     else
         do ia = 1, n_atom
+            temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
             do i = 1, 3
                 temp_atomic_coordinates(i,ia) = &
-                    lattice_vector(i,1) * atomic_coordinates(1,ia) + &
-                    lattice_vector(i,2) * atomic_coordinates(2,ia) + &
-                    lattice_vector(i,3) * atomic_coordinates(3,ia)
+                    lattice_vector(i,1) * temp_a(1) + &
+                    lattice_vector(i,2) * temp_a(2) + &
+                    lattice_vector(i,3) * temp_a(3)
             enddo
         enddo
         if(leqi(atomic_coordinates_format,'NotScaledCartesianBohr') .or. &
