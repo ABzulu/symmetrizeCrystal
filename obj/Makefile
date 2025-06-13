@@ -48,7 +48,7 @@ findDuplicateTranslations.o: constants.o
 symmetrize_m.o:
 writeOutput_m.o: constants.o calculatereciprocallattice_m.o
 spacegroup_db.o: spacegroup_db.f90
-	$(FC) -O0 $(IFLAGS) $(FCFLAGS) $(MDFLAGS) -c $<
+	$(FC) -O0 $(IFLAGS) $(MDFLAGS) -c $<
 
 .PHONY: clean
 
