@@ -69,6 +69,8 @@ program symmetrizeCrystal
         crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
     )
 
+    call findRotationalSymmetry(ITA_lattice_vectors, lattice_tol, W, n_W, debug)
+
     call restricAtomicCoordinates(ITA_lattice_vectors, n_atom, atomic_coordinates, debug)
 
     call findTranslationalSymmetry( &
