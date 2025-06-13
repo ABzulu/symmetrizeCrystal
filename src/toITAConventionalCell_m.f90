@@ -26,9 +26,9 @@ subroutine toITAConventionalCell( &
     case("Triclinic")
         do ix = 1, 3
             lattice_parameters(ix) = &
-                lattice_vectors(1,1) * lattice_vectors(1,1) + &
-                lattice_vectors(1,2) * lattice_vectors(1,2) + &
-                lattice_vectors(1,3) * lattice_vectors(1,3)
+                lattice_vectors(ix,1) * lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2) * lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
         alpha = &
@@ -70,9 +70,9 @@ subroutine toITAConventionalCell( &
     case("Monoclinic")
         do ix = 1, 3
             lattice_parameters(ix) = &
-                lattice_vectors(1,1) * lattice_vectors(1,1) + &
-                lattice_vectors(1,2) * lattice_vectors(1,2) + &
-                lattice_vectors(1,3) * lattice_vectors(1,3)
+                lattice_vectors(ix,1) * lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2) * lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
         beta = &
@@ -92,9 +92,9 @@ subroutine toITAConventionalCell( &
     case("Orthorhombic")
         do ix = 1, 3
             lattice_parameters(ix) = &
-                lattice_vectors(1,1) * lattice_vectors(1,1) + &
-                lattice_vectors(1,2) * lattice_vectors(1,2) + &
-                lattice_vectors(1,3) * lattice_vectors(1,3)
+                lattice_vectors(ix,1) * lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2) * lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
         ITA_lattice_vectors(1,1:3) = lattice_parameters(1) * [1.d0, 0.d0, 0.d0]
@@ -103,9 +103,9 @@ subroutine toITAConventionalCell( &
     case("Tetragonal")
         do ix = 1, 3
             lattice_parameters(ix) = &
-                lattice_vectors(1,1) * lattice_vectors(1,1) + &
-                lattice_vectors(1,2) * lattice_vectors(1,2) + &
-                lattice_vectors(1,3) * lattice_vectors(1,3)
+                lattice_vectors(ix,1) * lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2) * lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
         ITA_lattice_vectors(1,1:3) = lattice_parameters(1) * [1.d0, 0.d0, 0.d0]
@@ -114,9 +114,9 @@ subroutine toITAConventionalCell( &
     case("Hexagonal")
         do ix = 1, 3
             lattice_parameters(ix) = &
-                lattice_vectors(1,1) * lattice_vectors(1,1) + &
-                lattice_vectors(1,2) * lattice_vectors(1,2) + &
-                lattice_vectors(1,3) * lattice_vectors(1,3)
+                lattice_vectors(ix,1) * lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2) * lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
         ITA_lattice_vectors(1,1:3) = lattice_parameters(1) * [ 1.0d0, 0.0d0, 0.0d0]
