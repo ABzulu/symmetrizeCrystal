@@ -31,6 +31,12 @@ subroutine restricAtomicCoordinates( &
             reciprocal_lattice_vectors(ix,2) * modifyed_lattice_vectors(2,jx) + &
             reciprocal_lattice_vectors(ix,3) * modifyed_lattice_vectors(3,jx)
     enddo;enddo
+    if(debug) then
+        write(6,'(a)') "restrictAtomicCoordinates: T"
+        write(6,'(3f16.9)') T(1,1:3)
+        write(6,'(3f16.9)') T(2,1:3)
+        write(6,'(3f16.9)') T(3,1:3)
+    endif
     do ia = 1, n_atom
         temp_atomic_coordinate(1:3) = atomic_coordinates(1:3,ia)
         do ix = 1, 3
