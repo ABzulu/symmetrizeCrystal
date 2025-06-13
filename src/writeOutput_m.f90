@@ -1,5 +1,5 @@
-module output_m
-    use constants, only: ANGSTROM_AU
+module writeOutput_m
+    use constants, only: ANGSTROM_AU, eps16
     use calculatereciprocallattice_m, only: calculateReciprocalLattice
 
     implicit none
@@ -13,15 +13,16 @@ contains
 subroutine writeOutput( &
     lattice_constant, lattice_vector, &
     n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index, &
-    output_filename &
+    reduced_lattice_vectors, output_filename &
 )
     integer, intent(in) :: n_atom, atomic_species_index(n_atom)
-    double precision, intent(in) :: lattice_constant, lattice_vector(3,3)
-    double precision, intent(in) :: atomic_coordinates(3,n_atom)
+    double precision, intent(in) :: &
+        lattice_constant, lattice_vector(3,3), reduced_lattice_vectors(3,3), &
+        atomic_coordinates(3,n_atom)
     character(len=132), intent(in) :: atomic_coordinates_format, output_filename
 
     integer :: iounit, i, ia
-    double precision :: reciprocal_lattice_vector(3,3)
+    double precision :: temp_a(3), reciprocal_lattice_vector(3,3)
     double precision, allocatable :: temp_atomic_coordinates(:,:)
     logical :: leqi
 
@@ -38,6 +39,39 @@ subroutine writeOutput( &
     ! Change atomic coordinates to the original format
     allocate(temp_atomic_coordinates(3,n_atom))
     temp_atomic_coordinates = atomic_coordinates
+
+    temp_atomic_coordinates(:,:) = temp_atomic_coordinates(:,:) + 0.5d0
+
+    ! Change the coordinates in Bohr
+    do ia = 1, n_atom
+        temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
+        do i = 1, 3
+            temp_atomic_coordinates(i,ia) = &
+                reduced_lattice_vectors(1,i) * temp_a(1) + &
+                reduced_lattice_vectors(2,i) * temp_a(2) + &
+                reduced_lattice_vectors(3,i) * temp_a(3)
+        enddo
+    enddo
+
+    ! Change the coordinates in Fractional w.r.t input lattice vectors
+    call calculateReciprocalLattice( &
+        lattice_vector, reciprocal_lattice_vector, 0 &
+    )
+    do ia = 1, n_atom
+        temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
+        do i = 1, 3
+            temp_atomic_coordinates(i,ia) = &
+                reciprocal_lattice_vector(1,i) * temp_a(1) + &
+                reciprocal_lattice_vector(2,i) * temp_a(2) + &
+                reciprocal_lattice_vector(3,i) * temp_a(3)
+            temp_atomic_coordinates(i,ia) = &
+                modulo(temp_atomic_coordinates(i,ia),1.d0)
+            ! This is to take care of exactly 1.0d0 
+            if( temp_atomic_coordinates(i,ia) - 1.0d0 .gt. eps16) then
+                temp_atomic_coordinates(i,ia) = 0.0d0
+            endif
+        enddo
+    enddo
 
     if(leqi(atomic_coordinates_format,'ScaledByLatticeVectors') .or. &
        leqi(atomic_coordinates_format,'Fractional')) then
@@ -78,4 +112,4 @@ subroutine writeOutput( &
 
 end subroutine
 
-end module output_m
+end module writeOutput_m

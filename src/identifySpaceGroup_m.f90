@@ -8,16 +8,16 @@ module identifySpaceGroup_m
 contains
 
 subroutine identifySpaceGroup( &
-    symm_op, n_symm_op, M, &
+    symm_op, n_symm_op, &
     n_ops, rotations, translations, hall_symbol, debug &
 )
     integer, intent(inout) :: &
-        symm_op(3,4,192), n_symm_op, M(3,3), &
+        symm_op(3,4,192), n_symm_op, &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530)
     character(len=17), intent(in) :: hall_symbol(530)
     logical, intent(in) :: debug
 
-    integer :: ig, io, jo, ix, jx, temp_symm_op(3,4)
+    integer :: ig, io, jo, ix, jx, temp_symm_op(3,4), M(3,3)
     logical :: w_found_in_group(192)
 
     ! do io = 1, n_symm_op

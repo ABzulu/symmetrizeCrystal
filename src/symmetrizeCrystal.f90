@@ -1,13 +1,17 @@
 program symmetrizeCrystal
     use inlineoptions_m, only: getInlineOptions
     use input_m, only: readInput, formatInput
-    use structureinit_m, only: restricAtomicCoordinates, calculateMetric
-    use symmetry_m, only: findRotationalSymmetry, findTranslationalSymmetry
+    use niggliReduction_m, only: niggliReduction
+    use findRotationalSymmetry_m, only: findRotationalSymmetry
     use identifyCrystal_m, only: identifyCrystal
-    use primitiveToConventional_m, only: primitiveToConventional
-    use identifySpaceGroup_m, only: identifySpaceGroup
+    use toITAConventionalCell_m, only: toITAConventionalCell
+    use restricAtomicCoordinates_m, only: restricAtomicCoordinates
+    use findTranslationalSymmetry_m, only: findTranslationalSymmetry
     use spacegroup_db, only: loadInSpaceGroup
-    use output_m, only: writeOutput
+    use identifySpaceGroup_m, only: identifySpaceGroup
+    use findDuplicateTranslations_m, only: findDuplicateTranslations
+    use symmetrize_m, only: symmetrize_vector, symmetrize_matrix
+    use writeOutput_m, only: writeOutput
 
     implicit none
 
@@ -22,14 +26,16 @@ program symmetrizeCrystal
     double precision, allocatable :: atomic_coordinates(:,:)
 
     character(132) :: crystal_type
-    integer :: &
-        lattice_index(3), W(3,3,48), n_W, &
-        n_symm_op, symm_op(3,4,192), W_type(48), M(3,3)
-    double precision :: reduced_lattice_vectors(3,3), G(3,3)
+    integer :: W(3,3,48), n_W, W_type(48)
+    double precision :: reduced_lattice_vectors(3,3)
 
+    double precision :: ITA_lattice_vectors(3,3)
     integer :: &
+        n_symm_op, symm_op(3,4,192), &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530)
     character(len=17) :: hall_symbol(530)
+
+    integer :: ia
 
     ! Read in command line options and inputs
     call getInlineOptions( &
@@ -42,44 +48,62 @@ program symmetrizeCrystal
         n_atom, atomic_coordinates_format, atomic_coordinates,&
         n_species, atomic_species_index &
     )
-    ! Change atomic coordinates to Bohr
-    ! This is here because the lattice vectors are automatically transformed to Bohr
+
     call formatInput( &
         lattice_constant, lattice_vectors, &
-        atomic_coordinates_format, atomic_coordinates, n_atom, debug &
+        atomic_coordinates_format, atomic_coordinates, n_atom, &
+        debug &
     )
 
-    if(debug) write(6,*) "Checkpoint: Read input"
+    if(debug) write(6,'(a)') "Checkpoint: Read input"
 
-    call calculateMetric( &
-        lattice_vectors, lattice_index, reduced_lattice_vectors, G, debug &
+    call niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
+
+    call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
+
+    call identifyCrystal(W, n_W, W_type, crystal_type, debug)
+
+    if(debug) write(6,'(a)') "Checkpoint: Determined point group"
+
+    call toITAConventionalCell( &
+        crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
     )
+
     call restricAtomicCoordinates(reduced_lattice_vectors, n_atom, atomic_coordinates, debug)
-    call findRotationalSymmetry(G, lattice_tol, W, n_W, debug)
-    ! Atomic coordinates are changed to fractional between -0.5 < x <= 0.5
+
     call findTranslationalSymmetry( &
         n_atom, atomic_coordinates, n_species, atomic_species_index, & 
         atomic_tol, n_W, W, n_symm_op, symm_op, debug &
     )
 
-    if(debug) write(6,*) "Checkpoint: Find symmetry"
+    call findDuplicateTranslations( &
+        reduced_lattice_vectors, symm_op, n_symm_op, debug &
+    )
 
-    call identifyCrystal(W, n_W, W_type, crystal_type, debug)
-    ! call primitiveToConventional( &
-    !     crystal_type, W, n_W, M, debug &
-    ! )
     call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
+
     call identifySpaceGroup( &
-        symm_op, n_symm_op, M, &
+        symm_op, n_symm_op, &
         n_ops, rotations, translations, hall_symbol, debug &
     )
 
-    if(debug) write(6,'(a)') "Checkpoint: Identify symmetry group"
+    if(debug) write(6,'(a)') "Checkpoint: Determined space group"
+
+    call symmetrize_matrix( &
+        n_symm_op, symm_op, reduced_lattice_vectors, debug &
+    )
+    do ia = 1, n_atom
+        call symmetrize_vector( &
+            n_symm_op, symm_op, atomic_coordinates(1:3,ia), debug &
+        )
+    enddo
+
+    if(debug) write(6,'(a)') "Checkpoint: Symmetrized structure"
 
     call writeOutput( &
         lattice_constant, lattice_vectors, &
         n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index, &
-        output_filename &
+        reduced_lattice_vectors, output_filename &
     )
 
     ! Deallocate all allocatable arrays
