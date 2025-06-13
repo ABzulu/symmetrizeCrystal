@@ -55,6 +55,10 @@ program symmetrizeCrystal
         debug &
     )
 
+    call restricAtomicCoordinates( &
+        lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
+    )
+
     if(debug) write(6,'(a)') "Checkpoint: Read input"
 
     call niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
