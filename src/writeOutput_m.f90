@@ -56,9 +56,9 @@ subroutine writeOutput( &
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
         do i = 1, 3
             temp_atomic_coordinates(i,ia) = &
-                reduced_lattice_vectors(1,i) * temp_a(1) + &
-                reduced_lattice_vectors(2,i) * temp_a(2) + &
-                reduced_lattice_vectors(3,i) * temp_a(3)
+                reduced_lattice_vectors(i,1) * temp_a(1) + &
+                reduced_lattice_vectors(i,2) * temp_a(2) + &
+                reduced_lattice_vectors(i,3) * temp_a(3)
         enddo
     enddo
 
