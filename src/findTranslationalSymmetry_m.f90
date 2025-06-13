@@ -83,14 +83,13 @@ subroutine findTranslationalSymmetry( &
                 if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle                    
                 do ix = 1, 3
                     delta_x(ix) = abs( &
-                        modulo( &
+                        ( &
                             dble(W(ix,1,W_index(ic))) * atomic_coordinates(1,ia) + & 
                             dble(W(ix,2,W_index(ic))) * atomic_coordinates(2,ia) + & 
                             dble(W(ix,3,W_index(ic))) * atomic_coordinates(3,ia) + &
                             candidate_translational_operator(ix,ic) - &
-                            atomic_coordinates(ix,ja) + 0.5d0, &
-                            1.d0 &
-                        ) - 0.5d0 &
+                            atomic_coordinates(ix,ja) &
+                        ) &
                     )
                 enddo
                 if(debug) write(6,'(a,3i6,3f16.9)') &
