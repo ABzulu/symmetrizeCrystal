@@ -92,7 +92,6 @@ subroutine findTranslationalSymmetry( &
                             1.d0 &
                         ) - 0.5d0 &
                     )
-                    if(debug) write(6,'(i6, 3f16.9)') ic, delta_x                  
                 enddo
                 if(debug) write(6,'(a,3i6,3f16.9)') &
                     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
@@ -147,7 +146,8 @@ subroutine findTranslationalSymmetry( &
     do ic = 1, n_candidates
         if(.not. is_symmetric(ic)) cycle
         counter = counter + 1
-        if(debug) write(6,'(a,i4)') "findTranslationalSymmetry: W index = ", W_index(ic)
+        if(debug) write(6,'(a,2i4)') &
+            "findTranslationalSymmetry: W index, candidate index = ", W_index(ic), ic
         do ix = 1, 3
             symm_op(ix,1:3,counter) = W(ix,1:3,W_index(ic))
             symm_op(ix,4,counter) = nint(12.d0*candidate_translational_operator(ix,counter))
