@@ -29,10 +29,10 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
         enddo;enddo
 
         if(debug) then
-            if(debug) write(6,'(a)') "niggliReduction: Metric G"
-            write(6,'(3f16.9)') G(1,1:3)
-            write(6,'(3f16.9)') G(2,1:3)
-            write(6,'(3f16.9)') G(3,1:3)
+            if(debug) write(6,'(a)') "niggliReduction: Lattice vectors"
+            write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
+            write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
+            write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
         endif
 
         ! Force a_1 <= a_2 <= a_3
