@@ -71,7 +71,11 @@ program symmetrizeCrystal
 
     call findRotationalSymmetry(ITA_lattice_vectors, lattice_tol, W, n_W, debug)
 
-    call restricAtomicCoordinates(ITA_lattice_vectors, n_atom, atomic_coordinates, debug)
+    call restricAtomicCoordinates( &
+        ITA_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
+    )
+
+    if(debug) write(6,'(a)') "Checkpoint: Made compatible structure"
 
     call findTranslationalSymmetry( &
         n_atom, atomic_coordinates, n_species, atomic_species_index, & 

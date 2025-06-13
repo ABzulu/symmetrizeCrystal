@@ -11,19 +11,38 @@ module restricAtomicCoordinates_m
 contains
 
 subroutine restricAtomicCoordinates( &
-    lattice_vectors, n_atom, atomic_coordinates, debug &
+    modifyed_lattice_vectors, original_lattice_vectors, n_atom, atomic_coordinates, debug &
 )
     integer, intent(in) :: n_atom
-    double precision, intent(in) :: lattice_vectors(3,3)
+    double precision, intent(in) :: &
+        modifyed_lattice_vectors(3,3), original_lattice_vectors(3,3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
     logical, intent(in) :: debug
 
-    integer :: ia, i
-    double precision :: temp_atomic_coordinate(3), reciprocal_lattice_vectors(3,3)
+    integer :: ia, i, ix, jx
+    double precision :: &
+        temp_atomic_coordinate(3), reciprocal_lattice_vectors(3,3), T(3,3)
 
+    call calculateReciprocalLattice(original_lattice_vectors, reciprocal_lattice_vectors, 0)
+
+    do ix = 1, 3;do jx = 1, 3
+        T(ix,jx) = &
+            reciprocal_lattice_vectors(ix,1) * modifyed_lattice_vectors(1,jx) + &
+            reciprocal_lattice_vectors(ix,2) * modifyed_lattice_vectors(2,jx) + &
+            reciprocal_lattice_vectors(ix,3) * modifyed_lattice_vectors(3,jx)
+    enddo;enddo
+    do ia = 1, n_atom
+        temp_atomic_coordinate(1:3) = atomic_coordinates(1:3,ia)
+        do ix = 1, 3
+            atomic_coordinates(ix,ia) = &
+                T(ix,1) * temp_atomic_coordinate(1) + &
+                T(ix,2) * temp_atomic_coordinate(2) + &
+                T(ix,3) * temp_atomic_coordinate(3)
+        enddo
+    enddo
     ! Change atomic coordinate formats to fractional 
     ! and make the interval -0.5 < x <= 0.5
-    call calculateReciprocalLattice(lattice_vectors, reciprocal_lattice_vectors, 0)
+    call calculateReciprocalLattice(modifyed_lattice_vectors, reciprocal_lattice_vectors, 0)
 
     if(debug) then
         write(6,*) "restricAtomicCoordinates: Atomic coordinates before restriction"
