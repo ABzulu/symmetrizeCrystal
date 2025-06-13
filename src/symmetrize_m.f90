@@ -21,9 +21,9 @@ subroutine symmetrize_vector(n_symm_op, symm_op, vector, debug)
     do io = 1, n_symm_op
         do ix = 1, 3
             projected_vector(ix) = &
-                symm_op(1,ix,io) * vector(1) + &
-                symm_op(2,ix,io) * vector(2) + &
-                symm_op(3,ix,io) * vector(3) - &
+                symm_op(ix,1,io) * vector(1) + &
+                symm_op(ix,2,io) * vector(2) + &
+                symm_op(ix,3,io) * vector(3) - &
                 symm_op(ix,4,io)
         enddo
 
