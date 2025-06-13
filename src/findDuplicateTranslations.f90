@@ -42,9 +42,9 @@ subroutine findDuplicateTranslations( &
                 delta_t(iix) = symm_op(iix,4,io) - symm_op(iix,4,jo)
             enddo
 
-            do ix = -5, 5
-                do jx = -5, 5
-                    do kx = -5, 5
+            do ix = -12, 12
+                do jx = -12, 12
+                    do kx = -12, 12
                         do iix = 1, 3
                             lattice_translation(iix) = &
                                 ix * lattice_vectors(1,iix) + &
