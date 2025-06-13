@@ -88,11 +88,28 @@ subroutine findTranslationalSymmetry( &
                         dble(W(ix,3,W_index(ic))) * atomic_coordinates(3,ia) + &
                         candidate_translational_operator(ix,ic)
                     delta_x(ix) = modulo(delta_x(ix) + 0.5d0, 1.d0) - 0.5d0
-                    if(abs(delta_x(ix) + 0.5d0) .lt. eps16 ) delta_x (ix) = 0.5d0
+                    if(abs(delta_x(ix) + 0.5d0) .lt. eps16 ) delta_x(ix) = 0.5d0
 
                     delta_x(ix) = abs(delta_x(ix) - atomic_coordinates(ix,ja))
                 enddo
-                
+
+                if(debug) then
+                    if( &
+                        (W(1,1,W_index(ic)) .eq. 1) .and. &
+                        (W(2,2,W_index(ic)) .eq. 1) .and. &
+                        (W(3,3,W_index(ic)) .eq. 1) .and. &
+                        (W(1,2,W_index(ic)) .eq. 0) .and. &
+                        (W(2,1,W_index(ic)) .eq. 0) .and. &
+                        (W(1,3,W_index(ic)) .eq. 0) .and. &
+                        (W(3,1,W_index(ic)) .eq. 0) .and. &
+                        (W(2,3,W_index(ic)) .eq. 0) .and. &
+                        (W(3,2,W_index(ic)) .eq. 0) &
+                    ) then
+                        write(6,'(3f16.9)') candidate_translational_operator(1:3,ic)
+                        write(6,'(3f16.9)') delta_x(1:3)
+                    endif
+                endif
+
                 if(debug) write(6,'(a,3i6,3f16.9)') &
                     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
                 if(maxval(delta_x) .lt. atomic_tol) then
