@@ -167,7 +167,7 @@ subroutine findTranslationalSymmetry( &
             "findTranslationalSymmetry: W index, candidate index = ", W_index(ic), ic
         do ix = 1, 3
             symm_op(ix,1:3,counter) = W(ix,1:3,W_index(ic))
-            symm_op(ix,4,counter) = nint(12.d0*candidate_translational_operator(ix,counter))
+            symm_op(ix,4,counter) = nint(12.d0*candidate_translational_operator(ix,ic))
         enddo
     enddo
 
