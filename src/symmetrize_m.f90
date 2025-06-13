@@ -32,6 +32,8 @@ subroutine symmetrize_vector(n_symm_op, symm_op, vector, debug)
     enddo
     symmetric_vector(1:3) = symmetric_vector(1:3) / n_symm_op
 
+    vector(1:3) = symmetric_vector(1:3)
+
 end subroutine symmetrize_vector
 
 subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
@@ -65,6 +67,8 @@ subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
     enddo
     symmetric_matrix(1:3,1:3) = &
         symmetric_matrix(1:3,1:3) / dble(n_symm_op)
+
+    matrix(1:3,1:3) = symmetric_matrix(1:3,1:3)
 
 end subroutine symmetrize_matrix
 
