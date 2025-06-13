@@ -61,8 +61,10 @@ subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
             write(6,'(3f16.9)') projected_matrix(3,1:3)
         endif
 
-        symmetric_matrix(1:3,1:3) = &
-            symmetric_matrix(1:3,1:3) + projected_matrix(1:3,1:3) 
+        do ix = 1, 3;do jx = 1, 3
+            symmetric_matrix(ix,jx) = &
+                symmetric_matrix(ix,jx) + projected_matrix(ix,jx)
+        enddo;enddo
     enddo
     symmetric_matrix(1:3,1:3) = &
         symmetric_matrix(1:3,1:3) / dble(n_symm_op)
