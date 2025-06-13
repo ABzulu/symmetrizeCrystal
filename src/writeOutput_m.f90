@@ -66,6 +66,12 @@ subroutine writeOutput( &
     call calculateReciprocalLattice( &
         lattice_vector, reciprocal_lattice_vector, 0 &
     )
+
+    write(6,'(a)') "writeOutput: Reciprocal lattice vectors"
+    write(6,'(3f16.9)') reciprocal_lattice_vector(1,1:3)
+    write(6,'(3f16.9)') reciprocal_lattice_vector(2,1:3)
+    write(6,'(3f16.9)') reciprocal_lattice_vector(3,1:3)    
+
     do ia = 1, n_atom
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
         do i = 1, 3
