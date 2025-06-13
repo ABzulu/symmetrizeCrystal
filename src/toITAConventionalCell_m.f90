@@ -119,8 +119,8 @@ subroutine toITAConventionalCell( &
                 lattice_vectors(ix,3) * lattice_vectors(ix,3)
             lattice_parameters(ix) = sqrt(lattice_parameters(ix))
         enddo
-        ITA_lattice_vectors(1,1:3) = lattice_parameters(1) * [ 1.0d0, 0.0d0, 0.0d0]
-        ITA_lattice_vectors(2,1:3) = lattice_parameters(2) * [-0.5d0, sqrt(3.d0)*0.5d0, 0.0d0]                
+        ITA_lattice_vectors(1,1:3) = lattice_parameters(1) * [sqrt(3.d0)*0.5d0, -0.5d0, 0.0d0]
+        ITA_lattice_vectors(2,1:3) = lattice_parameters(2) * [ 0.0d0, 1.0d0, 0.0d0]                
         ITA_lattice_vectors(3,1:3) = lattice_parameters(3) * [ 0.0d0, 0.0d0, 1.0d0]        
     case("Cubic")
         do ix = 1, 3
