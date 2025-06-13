@@ -50,16 +50,16 @@ subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
         temp_matrix(1:3,1:3) = matrix(1:3,1:3)
         do ix = 1, 3;do jx = 1, 3
             projected_matrix(ix,jx) = &
-                symm_op(ix,1,io) * temp_matrix(1,jx) + &
-                symm_op(ix,2,io) * temp_matrix(2,jx) + &
-                symm_op(ix,3,io) * temp_matrix(3,jx)
+                symm_op(1,ix,io) * temp_matrix(1,jx) + &
+                symm_op(2,ix,io) * temp_matrix(2,jx) + &
+                symm_op(3,ix,io) * temp_matrix(3,jx)
         enddo;enddo
         temp_matrix(1:3,1:3) = projected_matrix(1:3,1:3)
         do ix = 1, 3;do jx = 1, 3
             projected_matrix(ix,jx) = &
-                temp_matrix(ix,1) * symm_op(jx,1,io) + &
-                temp_matrix(ix,2) * symm_op(jx,2,io) + &
-                temp_matrix(ix,3) * symm_op(jx,3,io)
+                temp_matrix(ix,1) * symm_op(1,jx,io) + &
+                temp_matrix(ix,2) * symm_op(2,jx,io) + &
+                temp_matrix(ix,3) * symm_op(3,jx,io)
         enddo;enddo
 
         symmetric_matrix(1:3,1:3) = &
