@@ -22,7 +22,7 @@ subroutine writeOutput( &
     character(len=132), intent(in) :: atomic_coordinates_format, output_filename
 
     integer :: iounit, i, ia, ix, jx, T(3,3)
-    double precision :: temp_a(3), reciprocal_lattice_vector(3,3), temp_lattice_vector(3,3)
+    double precision :: temp_a(3), reciprocal_lattice_vector(3,3), temp_lattice_vector(3,3), temp_TT(3,3)
     double precision, allocatable :: temp_atomic_coordinates(:,:)
     logical :: leqi
 
@@ -67,12 +67,16 @@ subroutine writeOutput( &
                 modulo(temp_atomic_coordinates(ix,ia),1.d0)
         enddo
     enddo
+
+    temp_TT = dble(T)
+    call calculateReciprocalLattice(temp_TT, reciprocal_lattice_vector, 0)
+
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
-                T(1,ix)*lattice_vector(1,jx) + &
-                T(2,ix)*lattice_vector(2,jx) + &
-                T(3,ix)*lattice_vector(3,jx)
+                lattice_vector(ix,1)*reciprocal_lattice_vector(1,jx) + &
+                lattice_vector(ix,2)*reciprocal_lattice_vector(2,jx) + &
+                lattice_vector(ix,3)*reciprocal_lattice_vector(3,jx)
         enddo
     enddo
 
