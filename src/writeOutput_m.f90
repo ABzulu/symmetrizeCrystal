@@ -81,9 +81,9 @@ subroutine writeOutput( &
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
-                lattice_vector(ix,1)*T(1,jx) + &
-                lattice_vector(ix,2)*T(2,jx) + &
-                lattice_vector(ix,3)*T(3,jx)
+                lattice_vector(1,ix)*T(1,jx) + &
+                lattice_vector(2,ix)*T(2,jx) + &
+                lattice_vector(3,ix)*T(3,jx)
         enddo
     enddo
 
@@ -126,7 +126,7 @@ subroutine writeOutput( &
         endif
     endif
 
-    write(iounit,'(2a)') "AtomicCoordinatesFormat", atomic_coordinates_format
+    write(iounit,'(2a)') "AtomicCoordinatesFormat        ", atomic_coordinates_format
     write(iounit,'(a)') "%block    AtomicCoordinatesAndAtomicSpecies"
     do ia = 1, n_atom
         write(iounit,'(3f16.10,i4)') &
