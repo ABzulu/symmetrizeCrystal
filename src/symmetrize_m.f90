@@ -14,23 +14,13 @@ subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
     double precision, intent(inout) :: vector(3)
     logical, intent(in) :: debug
 
-    integer :: io, ix
+    integer :: io, ix, counter
     double precision :: &
         projected_vector(3), symmetric_vector(3)
 
     symmetric_vector(1:3) = 0.d0
+    counter = 0
     do io = 1, n_symm_op
-        if( &
-            (symm_op(1,1,io) .eq. 1) .and. &
-            (symm_op(2,2,io) .eq. 1) .and. &
-            (symm_op(3,3,io) .eq. 1) .and. &
-            (symm_op(1,2,io) .eq. 0) .and. &
-            (symm_op(2,1,io) .eq. 0) .and. &
-            (symm_op(2,3,io) .eq. 0) .and. &
-            (symm_op(3,2,io) .eq. 0) .and. &
-            (symm_op(3,1,io) .eq. 0) .and. &
-            (symm_op(1,3,io) .eq. 0) &
-        ) cycle
         do ix = 1, 3
             projected_vector(ix) = &
                 dble(symm_op(ix,1,io)) * vector(1) + &
@@ -44,11 +34,13 @@ subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
             (abs(projected_vector(1) - vector(1)) .lt. tol) .and. &
             (abs(projected_vector(2) - vector(2)) .lt. tol) .and. &
             (abs(projected_vector(3) - vector(3)) .lt. tol) &
-        ) &
+        ) then
+            counter = counter + 1
             symmetric_vector(1:3) = &
                 symmetric_vector(1:3) + projected_vector(1:3)
+        endif
     enddo
-    symmetric_vector(1:3) = symmetric_vector(1:3) / n_symm_op
+    symmetric_vector(1:3) = symmetric_vector(1:3) / counter
 
     vector(1:3) = symmetric_vector(1:3)
 
