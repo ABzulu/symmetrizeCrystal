@@ -55,9 +55,9 @@ subroutine writeOutput( &
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
-            reciprocal_lattice_vector(1,ix) * lattice_vector(1,jx) + &
-            reciprocal_lattice_vector(2,ix) * lattice_vector(2,jx) + &
-            reciprocal_lattice_vector(3,ix) * lattice_vector(3,jx)
+            reciprocal_lattice_vector(ix,1) * lattice_vector(jx,1) + &
+            reciprocal_lattice_vector(ix,2) * lattice_vector(jx,2) + &
+            reciprocal_lattice_vector(ix,3) * lattice_vector(jx,3)
     enddo;enddo
     write(6,'(a)') "writeOutput: T"
     write(6,'(3f16.9)') T(1,1:3)
