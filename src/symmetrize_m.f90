@@ -20,6 +20,17 @@ subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
 
     symmetric_vector(1:3) = 0.d0
     do io = 1, n_symm_op
+        if( &
+            (symm_op(1,1,io) .eq. 1) .and. &
+            (symm_op(2,2,io) .eq. 1) .and. &
+            (symm_op(3,3,io) .eq. 1) .and. &
+            (symm_op(1,2,io) .eq. 0) .and. &
+            (symm_op(2,1,io) .eq. 0) .and. &
+            (symm_op(2,3,io) .eq. 0) .and. &
+            (symm_op(3,2,io) .eq. 0) .and. &
+            (symm_op(3,1,io) .eq. 0) .and. &
+            (symm_op(1,3,io) .eq. 0) &
+        ) cycle
         do ix = 1, 3
             projected_vector(ix) = &
                 dble(symm_op(ix,1,io)) * vector(1) + &
