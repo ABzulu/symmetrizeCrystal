@@ -8,8 +8,9 @@ module symmetrize_m
 
 contains
 
-subroutine symmetrize_vector(n_symm_op, symm_op, vector, debug)
+subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
     integer, intent(in) :: n_symm_op, symm_op(3,4,192)
+    double precision, intent(in) :: tol
     double precision, intent(inout) :: vector(3)
     logical, intent(in) :: debug
 
@@ -25,10 +26,16 @@ subroutine symmetrize_vector(n_symm_op, symm_op, vector, debug)
                 dble(symm_op(ix,2,io)) * vector(2) + &
                 dble(symm_op(ix,3,io)) * vector(3) + &
                 dble(symm_op(ix,4,io)) / 12.d0
+            projected_vector(ix) = modulo(projected_vector(ix)+0.5d0,1.d0) - 0.5d0
         enddo
 
-        symmetric_vector(1:3) = &
-            symmetric_vector(1:3) + projected_vector(1:3)
+        if( &
+            (abs(projected_vector(1) - vector(1)) .lt. tol) .and. &
+            (abs(projected_vector(2) - vector(2)) .lt. tol) .and. &
+            (abs(projected_vector(3) - vector(3)) .lt. tol) &
+        ) &
+            symmetric_vector(1:3) = &
+                symmetric_vector(1:3) + projected_vector(1:3)
     enddo
     symmetric_vector(1:3) = symmetric_vector(1:3) / n_symm_op
 

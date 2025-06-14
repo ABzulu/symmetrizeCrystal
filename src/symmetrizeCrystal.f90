@@ -97,7 +97,7 @@ program symmetrizeCrystal
 
     do ia = 1, n_atom
         call symmetrize_vector( &
-            n_symm_op, symm_op, atomic_coordinates(1:3,ia), debug &
+            n_symm_op, symm_op, atomic_tol, atomic_coordinates(1:3,ia), debug &
         )
     enddo
 
