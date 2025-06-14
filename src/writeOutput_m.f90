@@ -77,11 +77,11 @@ subroutine writeOutput( &
             reciprocal_lattice_vector(ix,3) * lattice_vector(jx,3) &
         )
     enddo;enddo
-    write(6,'(a)') "writeOutput: T"
+    write(6,'(a)') "writeOutput: lattice_vector"
     write(6,'(3f16.9)') lattice_vector(1,1:3)
     write(6,'(3f16.9)') lattice_vector(2,1:3)
     write(6,'(3f16.9)') lattice_vector(3,1:3)
-    write(6,'(a)') "writeOutput: T"
+    write(6,'(a)') "writeOutput: reduced_lattice_vectors"
     write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
     write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
     write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
@@ -92,9 +92,9 @@ subroutine writeOutput( &
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
-                lattice_vector(1,ix)*T(1,jx) + &
-                lattice_vector(2,ix)*T(2,jx) + &
-                lattice_vector(3,ix)*T(3,jx)
+                reduced_lattice_vectors(1,ix)*T(1,jx) + &
+                reduced_lattice_vectors(2,ix)*T(2,jx) + &
+                reduced_lattice_vectors(3,ix)*T(3,jx)
         enddo
     enddo
 
