@@ -55,9 +55,9 @@ subroutine writeOutput( &
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
-            reciprocal_lattice_vector(ix,1) * lattice_vector(1,jx) + &
-            reciprocal_lattice_vector(ix,2) * lattice_vector(2,jx) + &
-            reciprocal_lattice_vector(ix,3) * lattice_vector(3,jx)
+            reciprocal_lattice_vector(ix,1) * lattice_vector(jx,1) + &
+            reciprocal_lattice_vector(ix,2) * lattice_vector(jx,2) + &
+            reciprocal_lattice_vector(ix,3) * lattice_vector(jx,3)
     enddo;enddo
     do ia = 1, n_atom
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
@@ -66,22 +66,6 @@ subroutine writeOutput( &
                 T(ix,1) * temp_a(1) + &
                 T(ix,2) * temp_a(2) + &
                 T(ix,3) * temp_a(3)
-        enddo
-    enddo
-
-    do ia = 1, n_atom
-        temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
-        do i = 1, 3
-            temp_atomic_coordinates(i,ia) = &
-                reciprocal_lattice_vector(i,1) * temp_a(1) + &
-                reciprocal_lattice_vector(i,2) * temp_a(2) + &
-                reciprocal_lattice_vector(i,3) * temp_a(3)
-            temp_atomic_coordinates(i,ia) = &
-                modulo(temp_atomic_coordinates(i,ia), 1.d0)
-            ! This is to take care of exactly 1.0d0 
-            if( temp_atomic_coordinates(i,ia) - 1.0d0 .gt. eps16) then
-                temp_atomic_coordinates(i,ia) = 0.0d0
-            endif
         enddo
     enddo
 
