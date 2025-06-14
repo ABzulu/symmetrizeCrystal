@@ -40,8 +40,6 @@ subroutine writeOutput( &
     allocate(temp_atomic_coordinates(3,n_atom))
     temp_atomic_coordinates = atomic_coordinates
 
-    temp_atomic_coordinates(:,:) = temp_atomic_coordinates(:,:) + 0.5d0
-
     write(6,'(a)') "writeOutput: Reduced lattice vectors"
     write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
     write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
