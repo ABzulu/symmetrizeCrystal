@@ -57,9 +57,9 @@ subroutine writeOutput( &
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
         do ix = 1, 3
             temp_atomic_coordinates(ix,ia) = &
-                reciprocal_lattice_vector(ix,1) * temp_a(1) + &
-                reciprocal_lattice_vector(ix,2) * temp_a(2) + &
-                reciprocal_lattice_vector(ix,3) * temp_a(3)
+                reduced_lattice_vectors(ix,1) * temp_a(1) + &
+                reduced_lattice_vectors(ix,2) * temp_a(2) + &
+                reduced_lattice_vectors(ix,3) * temp_a(3)
         enddo
     enddo    
     write(6,'(a)') "writeOutput: Atomic coordinates in Bohr coordinates"
