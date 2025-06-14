@@ -78,6 +78,14 @@ subroutine writeOutput( &
         )
     enddo;enddo
     write(6,'(a)') "writeOutput: T"
+    write(6,'(3f16.9)') lattice_vector(1,1:3)
+    write(6,'(3f16.9)') lattice_vector(2,1:3)
+    write(6,'(3f16.9)') lattice_vector(3,1:3)
+    write(6,'(a)') "writeOutput: T"
+    write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
+    write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
+    write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
+    write(6,'(a)') "writeOutput: T"
     write(6,'(3i4)') T(1,1:3)
     write(6,'(3i4)') T(2,1:3)
     write(6,'(3i4)') T(3,1:3)
