@@ -51,13 +51,13 @@ subroutine writeOutput( &
         write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
     enddo
 
-    call calculateReciprocalLattice(lattice_vector, reciprocal_lattice_vector, 0)
+    call calculateReciprocalLattice(reduced_lattice_vectors, reciprocal_lattice_vector, 0)
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
-            reciprocal_lattice_vector(1,ix) * reduced_lattice_vectors(1,jx) + &
-            reciprocal_lattice_vector(2,ix) * reduced_lattice_vectors(2,jx) + &
-            reciprocal_lattice_vector(3,ix) * reduced_lattice_vectors(3,jx)
+            reciprocal_lattice_vector(1,ix) * lattice_vector(1,jx) + &
+            reciprocal_lattice_vector(2,ix) * lattice_vector(2,jx) + &
+            reciprocal_lattice_vector(3,ix) * lattice_vector(3,jx)
     enddo;enddo
     write(6,'(a)') "writeOutput: T"
     write(6,'(3f16.9)') T(1,1:3)
