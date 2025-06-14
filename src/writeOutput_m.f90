@@ -21,8 +21,8 @@ subroutine writeOutput( &
         atomic_coordinates(3,n_atom)
     character(len=132), intent(in) :: atomic_coordinates_format, output_filename
 
-    integer :: iounit, i, ia, ix, jx
-    double precision :: temp_a(3), reciprocal_lattice_vector(3,3), T(3,3)
+    integer :: iounit, i, ia, ix, jx, T(3,3)
+    double precision :: temp_a(3), reciprocal_lattice_vector(3,3)
     double precision, allocatable :: temp_atomic_coordinates(:,:)
     logical :: leqi
 
@@ -52,10 +52,11 @@ subroutine writeOutput( &
     call calculateReciprocalLattice(lattice_vector, reciprocal_lattice_vector, 0)
 
     do ix = 1, 3;do jx = 1, 3
-        T(ix,jx) = &
+        T(ix,jx) = nint( &
             reciprocal_lattice_vector(ix,1) * reduced_lattice_vectors(jx,1) + &
             reciprocal_lattice_vector(ix,2) * reduced_lattice_vectors(jx,2) + &
-            reciprocal_lattice_vector(ix,3) * reduced_lattice_vectors(jx,3)
+            reciprocal_lattice_vector(ix,3) * reduced_lattice_vectors(jx,3) &
+        )
     enddo;enddo
     write(6,'(a)') "writeOutput: T"
     write(6,'(3f16.9)') T(1,1:3)
