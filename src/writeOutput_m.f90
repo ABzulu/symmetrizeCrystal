@@ -22,19 +22,13 @@ subroutine writeOutput( &
     character(len=132), intent(in) :: atomic_coordinates_format, output_filename
 
     integer :: iounit, i, ia, ix, jx, T(3,3)
-    double precision :: temp_a(3), reciprocal_lattice_vector(3,3)
+    double precision :: temp_a(3), reciprocal_lattice_vector(3,3), temp_lattice_vector(3,3)
     double precision, allocatable :: temp_atomic_coordinates(:,:)
     logical :: leqi
 
     open(newunit=iounit, file=output_filename, status='replace')
 
     write(iounit,'(a,f20.10,a)') "LatticeConstant", lattice_constant, " Bohr"
-
-    write(iounit,'(a)') "%block    LatticeVectors"
-    do i = 1,3
-        write(iounit,'(3f16.10)') lattice_vector(i,1:3)/lattice_constant
-    enddo
-    write(iounit,'(a)') "%endlock  LatticeVectors"
 
     ! Change atomic coordinates to the original format
     allocate(temp_atomic_coordinates(3,n_atom))
@@ -73,6 +67,20 @@ subroutine writeOutput( &
                 modulo(temp_atomic_coordinates(ix,ia),1.d0)
         enddo
     enddo
+    do ix = 1, 3
+        do jx = 1, 3
+            temp_lattice_vector(ix,jx) = &
+                T(ix,1)*lattice_vector(1,jx) + &
+                T(ix,2)*lattice_vector(2,jx) + &
+                T(ix,3)*lattice_vector(3,jx)
+        enddo
+    enddo
+
+    write(iounit,'(a)') "%block    LatticeVectors"
+    do i = 1,3
+        write(iounit,'(3f16.10)') temp_lattice_vector(i,1:3)/lattice_constant
+    enddo
+    write(iounit,'(a)') "%endlock  LatticeVectors"
 
     write(6,'(a)') "writeOutput: Atomic coordinates in fractional coordinates"
     do ia = 1, n_atom
