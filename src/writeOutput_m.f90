@@ -53,9 +53,9 @@ subroutine writeOutput( &
         )
     enddo;enddo
     write(6,'(a)') "writeOutput: T"
-    write(6,'(3f16.9)') T(1,1:3)
-    write(6,'(3f16.9)') T(2,1:3)
-    write(6,'(3f16.9)') T(3,1:3)
+    write(6,'(3i4)') T(1,1:3)
+    write(6,'(3i4)') T(2,1:3)
+    write(6,'(3i4)') T(3,1:3)
     do ia = 1, n_atom
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
         do ix = 1, 3
@@ -77,7 +77,10 @@ subroutine writeOutput( &
             reciprocal_lattice_vector(ix,3) * lattice_vector(jx,3) &
         )
     enddo;enddo
-
+    write(6,'(a)') "writeOutput: T"
+    write(6,'(3i4)') T(1,1:3)
+    write(6,'(3i4)') T(2,1:3)
+    write(6,'(3i4)') T(3,1:3)
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
