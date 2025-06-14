@@ -55,9 +55,9 @@ subroutine writeOutput( &
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
-            reciprocal_lattice_vector(ix,1) * lattice_vector(jx,1) + &
-            reciprocal_lattice_vector(ix,2) * lattice_vector(jx,2) + &
-            reciprocal_lattice_vector(ix,3) * lattice_vector(jx,3)
+            reciprocal_lattice_vector(ix,1) * lattice_vector(1,jx) + &
+            reciprocal_lattice_vector(ix,2) * lattice_vector(2,jx) + &
+            reciprocal_lattice_vector(ix,3) * lattice_vector(3,jx)
     enddo;enddo
     do ia = 1, n_atom
         temp_a(1:3) = temp_atomic_coordinates(1:3,ia)
