@@ -74,9 +74,9 @@ subroutine writeOutput( &
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
-                lattice_vector(ix,1)*reciprocal_lattice_vector(jx,1) + &
-                lattice_vector(ix,2)*reciprocal_lattice_vector(jx,2) + &
-                lattice_vector(ix,3)*reciprocal_lattice_vector(jx,3)
+                lattice_vector(1,ix)*reciprocal_lattice_vector(1,jx) + &
+                lattice_vector(2,ix)*reciprocal_lattice_vector(2,jx) + &
+                lattice_vector(3,ix)*reciprocal_lattice_vector(3,jx)
         enddo
     enddo
 
