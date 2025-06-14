@@ -60,6 +60,10 @@ subroutine writeOutput( &
                 reduced_lattice_vectors(ix,3) * temp_a(3)
         enddo
     enddo    
+    write(6,'(a)') "writeOutput: Atomic coordinates in Bohr coordinates"
+    do ia = 1, n_atom
+        write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
+    enddo
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
@@ -79,11 +83,6 @@ subroutine writeOutput( &
                 T(ix,2) * temp_a(2) + &
                 T(ix,3) * temp_a(3)
         enddo
-    enddo
-
-    write(6,'(a)') "writeOutput: Atomic coordinates in Bohr coordinates"
-    do ia = 1, n_atom
-        write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
     enddo
 
     call calculateReciprocalLattice(lattice_vector, reciprocal_lattice_vector, 0)
