@@ -68,6 +68,8 @@ subroutine writeOutput( &
                 T(ix,1) * temp_a(1) + &
                 T(ix,2) * temp_a(2) + &
                 T(ix,3) * temp_a(3)
+            temp_atomic_coordinates(ix,ia) = &
+                modulo(temp_atomic_coordinates(ix,ia),1.d0)
         enddo
     enddo
 
