@@ -92,9 +92,9 @@ subroutine writeOutput( &
     do ix = 1, 3
         do jx = 1, 3
             temp_lattice_vector(ix,jx) = &
-                reduced_lattice_vectors(1,ix)*T(1,jx) + &
-                reduced_lattice_vectors(2,ix)*T(2,jx) + &
-                reduced_lattice_vectors(3,ix)*T(3,jx)
+                T(1,ix)*reduced_lattice_vectors(1,jx) + &
+                T(2,ix)*reduced_lattice_vectors(2,jx) + &
+                T(3,ix)*reduced_lattice_vectors(3,jx)
         enddo
     enddo
 
