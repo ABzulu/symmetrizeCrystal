@@ -19,7 +19,7 @@ program symmetrizeCrystal
 
     character(132) :: &
         atomic_coordinates_format, input_filename, output_filename
-    integer :: n_atom, n_species
+    integer :: n_atom, n_species, maxIteration
     integer, allocatable :: atomic_species_index(:)
     double precision :: &
         lattice_constant, lattice_vectors(3,3), lattice_tol, atomic_tol
@@ -29,17 +29,19 @@ program symmetrizeCrystal
     integer :: W(3,3,48), n_W, W_type(48)
     double precision :: reduced_lattice_vectors(3,3)
 
-    double precision :: ITA_lattice_vectors(3,3)
+    double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
     integer :: &
         n_symm_op, symm_op(3,4,192), &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530)
     character(len=17) :: hall_symbol(530)
+    logical :: found_space_group
 
-    integer :: ia
+    integer :: ia, ir
 
     ! Read in command line options and inputs
     call getInlineOptions( &
-        lattice_tol, atomic_tol, input_filename, output_filename, debug &
+        lattice_tol, atomic_tol, input_filename, output_filename, &
+        maxIteration, debug &
     )
 
     ! Read in input.fdf for structure parameters
@@ -57,43 +59,59 @@ program symmetrizeCrystal
 
     if(debug) write(6,'(a)') "Checkpoint: Read input"
 
-    call niggliReduction( &
-        lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
-    )
+    original_atomic_tol = atomic_tol
+    do ir = 1, maxIteration
 
-    call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
+        call niggliReduction( &
+            lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
+        )
 
-    call identifyCrystal(W, n_W, W_type, crystal_type, debug)
+        call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
 
-    if(debug) write(6,'(a)') "Checkpoint: Determined point group"
+        call identifyCrystal(W, n_W, W_type, crystal_type, debug)
 
-    call toITAConventionalCell( &
-        crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
-    )
+        if(debug) write(6,'(a)') "Checkpoint: Determined point group"
 
-    call findRotationalSymmetry(ITA_lattice_vectors, lattice_tol, W, n_W, debug)
+        call toITAConventionalCell( &
+            crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
+        )
 
-    call restricAtomicCoordinates( &
-        ITA_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
-    )
+        call findRotationalSymmetry(ITA_lattice_vectors, lattice_tol, W, n_W, debug)
 
-    if(debug) write(6,'(a)') "Checkpoint: Made compatible structure"
+        call restricAtomicCoordinates( &
+            ITA_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
+        )
 
-    call findTranslationalSymmetry( &
-        n_atom, atomic_coordinates, n_species, atomic_species_index, & 
-        atomic_tol, n_W, W, n_symm_op, symm_op, debug &
-    )
+        if(debug) write(6,'(a)') "Checkpoint: Made compatible structure"
 
-    call findDuplicateTranslations( &
-        ITA_lattice_vectors, symm_op, n_symm_op, debug &
-    )
+        call findTranslationalSymmetry( &
+            n_atom, atomic_coordinates, n_species, atomic_species_index, & 
+            atomic_tol, n_W, W, n_symm_op, symm_op, debug &
+        )
 
-    call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
+        call findDuplicateTranslations( &
+            ITA_lattice_vectors, symm_op, n_symm_op, debug &
+        )
 
-    call identifySpaceGroup( &
-        symm_op, n_symm_op, &
-        n_ops, rotations, translations, hall_symbol, debug &
-    )
+        call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
+
+        call identifySpaceGroup( &
+            symm_op, n_symm_op, &
+            n_ops, rotations, translations, hall_symbol, found_space_group, debug &
+        )
+
+        if(found_space_group) then
+            write(6,'(a,i6,a)') "After ", ir, " iteration found space group"
+            exit
+        endif
+
+        atomic_tol = atomic_tol * 10.d0
+        if(atomic_tol .gt. 0.1d0) then
+            atomic_tol = original_atomic_tol
+            lattice_tol = lattice_tol * 10.d0
+        endif
+            
+    enddo
 
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
