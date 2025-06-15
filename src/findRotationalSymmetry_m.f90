@@ -96,7 +96,7 @@ subroutine findRotationalSymmetry( &
         ! if(debug) write(6,'(3f16.9)') off_diag(1:3)
         ! if(debug) write(6,'(3f16.9)') off_diag(4:6)
         if(((maxval(diag)/sqrt(G(3,3))) .gt. lattice_tol) .or. &
-           (maxval(off_diag) .gt. lattice_tol)) cycle
+           ((maxval(off_diag)/sqrt(G(3,3))) .gt. lattice_tol)) cycle
 
         n_W = n_W + 1
         if(n_W .gt. 48) then
