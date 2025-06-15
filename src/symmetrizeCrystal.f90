@@ -57,7 +57,9 @@ program symmetrizeCrystal
 
     if(debug) write(6,'(a)') "Checkpoint: Read input"
 
-    call niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
+    call niggliReduction( &
+        lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
+    )
 
     call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
 

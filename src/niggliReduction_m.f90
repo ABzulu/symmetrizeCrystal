@@ -9,8 +9,10 @@ module niggliReduction_m
 
 contains
 
-subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
-    double precision, intent(in) :: lattice_vectors(3,3)
+subroutine niggliReduction( &
+    lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
+)
+    double precision, intent(in) :: lattice_vectors(3,3), lattice_tol
     logical, intent(in) :: debug
     double precision, intent(out) :: reduced_lattice_vectors(3,3)
 
@@ -36,19 +38,19 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
         endif
 
         ! Force a_1 <= a_2 <= a_3
-        if(G(2,2) - G(3,3) .gt. eps6) then
+        if(G(2,2) - G(3,3) .gt. lattice_tol) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 1"
             temp_array(1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = reduced_lattice_vectors(3,1:3)
             reduced_lattice_vectors(3,1:3) = temp_array(1:3)
         endif
-        if(G(1,1) - G(2,2) .gt. eps6) then
+        if(G(1,1) - G(2,2) .gt. lattice_tol) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 2"
             temp_array(1:3) = reduced_lattice_vectors(1,1:3)
             reduced_lattice_vectors(1,1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = temp_array(1:3)
         endif
-        if(G(2,2) - G(3,3) .gt. eps6) then
+        if(G(2,2) - G(3,3) .gt. lattice_tol) then
             if(debug) write(6,'(a)') "niggliReduction: a_1 <= a_2 <= a_3 # 3"
             temp_array(1:3) = reduced_lattice_vectors(2,1:3)
             reduced_lattice_vectors(2,1:3) = reduced_lattice_vectors(3,1:3)
@@ -57,8 +59,8 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
 
         ! Tie-breaker
         if( &
-            (abs(G(2,2) - G(3,3)) .lt. eps6) .and. &
-            (abs(G(1,1) - G(2,2)) .lt. eps6) &
+            (abs(G(2,2) - G(3,3)) .lt. lattice_tol) .and. &
+            (abs(G(1,1) - G(2,2)) .lt. lattice_tol) &
         ) then
             if( &
                 (abs(G(2,3) - G(3,1)) .gt. eps6) .and. &
@@ -76,8 +78,8 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
             endif
         endif
         if( &
-            (abs(G(2,2) - G(3,3)) .lt. eps6) .and. &
-            (abs(G(1,1) - G(2,2)) .lt. eps6) &
+            (abs(G(2,2) - G(3,3)) .lt. lattice_tol) .and. &
+            (abs(G(1,1) - G(2,2)) .lt. lattice_tol) &
         ) then
             if( &
                 (abs(G(2,3) - G(3,1)) .gt. eps6) .and. &
@@ -95,7 +97,7 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
             endif
         endif
         
-        if(abs(G(1,1) - G(2,2)) .lt. eps6) then
+        if(abs(G(1,1) - G(2,2)) .lt. lattice_tol) then
             if(abs(G(3,1) - G(1,2)) .gt. eps6) then
                 continue
             else
@@ -104,7 +106,7 @@ subroutine niggliReduction(lattice_vectors, reduced_lattice_vectors, debug)
                 reduced_lattice_vectors(2,1:3) = reduced_lattice_vectors(3,1:3)
                 reduced_lattice_vectors(3,1:3) = temp_array(1:3)
             endif
-        elseif(abs(G(2,2) - G(3,3)) .lt. eps6) then
+        elseif(abs(G(2,2) - G(3,3)) .lt. lattice_tol) then
             if(abs(G(2,3) - G(3,1)) .gt. eps6) then
                 continue
             else
