@@ -56,16 +56,16 @@ subroutine findTranslationalSymmetry( &
                 do ix = 1, 3
                     candidate_translational_operator(ix,counter) = &
                         atomic_coordinates(ix,ja) - ( &
-                        dble(W(ix,1,iw)) * atomic_coordinates(1,ia) + & 
-                        dble(W(ix,2,iw)) * atomic_coordinates(2,ia) + & 
+                        dble(W(ix,1,iw)) * atomic_coordinates(1,ia) + &
+                        dble(W(ix,2,iw)) * atomic_coordinates(2,ia) + &
                         dble(W(ix,3,iw)) * atomic_coordinates(3,ia))
                     candidate_translational_operator(ix,counter) = &
                         modulo(candidate_translational_operator(ix,counter),1.d0)
                     if(abs(candidate_translational_operator(ix,counter) - 1.d0) .lt. atomic_tol) &
                         candidate_translational_operator(ix,counter) = 0.d0
                 enddo
-                if(debug) write(6,'(i6,3f16.9)') &
-                    counter, candidate_translational_operator(1:3,counter)
+                ! if(debug) write(6,'(i6,3f16.9)') &
+                !     counter, candidate_translational_operator(1:3,counter)
             enddo
         enddo
     enddo
@@ -94,11 +94,11 @@ subroutine findTranslationalSymmetry( &
         do ia = 1, n_atom
             found_match = .false.
             do ja = 1, n_atom
-                if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle                    
+                if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle
                 do ix = 1, 3
                     delta_x(ix) = &
-                        dble(W(ix,1,W_index(ic))) * atomic_coordinates(1,ia) + & 
-                        dble(W(ix,2,W_index(ic))) * atomic_coordinates(2,ia) + & 
+                        dble(W(ix,1,W_index(ic))) * atomic_coordinates(1,ia) + &
+                        dble(W(ix,2,W_index(ic))) * atomic_coordinates(2,ia) + &
                         dble(W(ix,3,W_index(ic))) * atomic_coordinates(3,ia) + &
                         candidate_translational_operator(ix,ic)
                     delta_x(ix) = modulo(delta_x(ix) + 0.5d0, 1.d0) - 0.5d0
@@ -107,8 +107,8 @@ subroutine findTranslationalSymmetry( &
                     delta_x(ix) = abs(delta_x(ix) - atomic_coordinates(ix,ja))
                 enddo
 
-                if(debug) write(6,'(a,3i6,3f16.9)') &
-                    "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
+                ! if(debug) write(6,'(a,3i6,3f16.9)') &
+                !     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
                 if(maxval(delta_x) .lt. atomic_tol) then
                     found_match = .true.
                     if(debug) write(6,'(a)') "Found matching atoms"
@@ -144,7 +144,7 @@ subroutine findTranslationalSymmetry( &
     if(debug) then
         write(6,'(a,i4)') "findTranslationalSymmetry: After finding space group n_W = ", n_W
         do iw = 1, n_W
-                write(6,'(a,i4)') "findTranslationalSymmetry: W index = ", iw 
+                write(6,'(a,i4)') "findTranslationalSymmetry: W index = ", iw
             do ix = 1, 3
                 write(6,'(3i4)') W(ix,1:3,iw)
             enddo
@@ -174,9 +174,9 @@ subroutine findTranslationalSymmetry( &
     write(6,*) "findTranslationalSymmetry: symm_op"
     do ic = 1, n_symm_op
         write(6,*) "symmetry operator index", ic
-        write(6,'(4i4)') symm_op(1,1:4,ic) 
-        write(6,'(4i4)') symm_op(2,1:4,ic) 
-        write(6,'(4i4)') symm_op(3,1:4,ic) 
+        write(6,'(4i4)') symm_op(1,1:4,ic)
+        write(6,'(4i4)') symm_op(2,1:4,ic)
+        write(6,'(4i4)') symm_op(3,1:4,ic)
     enddo
 
     deallocate(n_atom_per_species)
