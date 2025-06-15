@@ -103,6 +103,8 @@ program symmetrizeCrystal
         if(found_space_group) then
             write(6,'(a,i6,a)') "After ", ir, " iteration found space group"
             exit
+        else
+            write(6,'(a)') "Could not find space group, relaxing tolerance"
         endif
 
         atomic_tol = atomic_tol * 10.d0
