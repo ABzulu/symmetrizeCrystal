@@ -137,7 +137,7 @@ subroutine writeOutput( &
         endif
     endif
 
-    write(iounit,'(2a)') "AtomicCoordinatesFormat        ", atomic_coordinates_format
+    write(iounit,'(2a)') "AtomicCoordinatesFormat        ", trim(atomic_coordinates_format)
     write(iounit,'(a)') "%block    AtomicCoordinatesAndAtomicSpecies"
     do ia = 1, n_atom
         write(iounit,'(3f16.10,i4)') &
