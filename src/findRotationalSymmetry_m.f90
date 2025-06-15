@@ -10,9 +10,9 @@ module findRotationalSymmetry_m
 contains
 
 subroutine findRotationalSymmetry( &
-    lattice_vectors, lattice_error, W, n_W, debug &
+    lattice_vectors, lattice_tol, W, n_W, debug &
 )
-    double precision, intent(in) :: lattice_vectors(3,3), lattice_error
+    double precision, intent(in) :: lattice_vectors(3,3), lattice_tol
     integer, intent(out) :: W(3,3,48)
     integer, intent(out) :: n_W
     logical, intent(in) :: debug
@@ -95,8 +95,8 @@ subroutine findRotationalSymmetry( &
         ! if(debug) write(6,'(3f16.9)') diag(1:3)
         ! if(debug) write(6,'(3f16.9)') off_diag(1:3)
         ! if(debug) write(6,'(3f16.9)') off_diag(4:6)
-        if((maxval(diag) .gt. lattice_error) .or. &
-           (maxval(off_diag) .gt. lattice_error)) cycle
+        if(((maxval(diag)/sqrt(G(3,3))) .gt. lattice_tol) .or. &
+           (maxval(off_diag) .gt. lattice_tol)) cycle
 
         n_W = n_W + 1
         if(n_W .gt. 48) then
