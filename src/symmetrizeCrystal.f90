@@ -119,8 +119,8 @@ program symmetrizeCrystal
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
     do ia = 1, n_atom
-        if(debug) write(6,'a') "Atomic coordinates being symmetrized"
-        if(debug) write(6,'3f16.9') atomic_coordinates(1:3,ia)
+        if(debug) write(6,'(a)') "Atomic coordinates being symmetrized"
+        if(debug) write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         call symmetrizeVector( &
             n_symm_op, symm_op, atomic_tol, atomic_coordinates(1:3,ia), debug &
         )
