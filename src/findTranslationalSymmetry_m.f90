@@ -17,58 +17,73 @@ subroutine findTranslationalSymmetry( &
     double precision, intent(in) :: atomic_coordinates(3,n_atom), atomic_tol
     logical, intent(in) :: debug
     integer, intent(inout) :: n_W, W(3,3,48)
-    integer, intent(out) :: n_symm_op, symm_op(3,4,192)
+    integer, intent(out) :: n_symm_op
+    integer, allocatable, intent(out) :: symm_op(:,:,:)
 
-    integer :: is, n_candidates, ia, ja, iw, ix, counter, ic
+    integer :: is, n_candidates, ia, ja, iw, ix, jx, kx, counter, ic
     integer, allocatable :: n_atom_per_species(:), W_index(:)
     double precision :: delta_x(3)
     double precision, allocatable :: candidate_translational_operator(:,:)
     logical :: found_match, W_match(48)
     logical, allocatable :: is_symmetric(:)
 
-    allocate(n_atom_per_species(n_species))
-    n_atom_per_species(:) = 0
-    do is = 1, n_species
-        do ia = 1, n_atom
-            if(atomic_species_index(ia) .eq. is) &
-                n_atom_per_species(is) = n_atom_per_species(is) + 1
-        enddo
-    enddo
-
-    n_candidates = 0
-    do is = 1, n_species
-        n_candidates = &
-            n_candidates + n_atom_per_species(is)*n_atom_per_species(is)
-    enddo
-    n_candidates = n_candidates * n_W
-    allocate(candidate_translational_operator(3,n_candidates), is_symmetric(n_candidates))
-    allocate(W_index(n_candidates))
-
-    ! Find candidate translational operator from other atoms of the same species
-    counter = 0
-    if(debug) write(6,*) "findTranslationalSymmetry: candidate_translational_operators"
-    do iw = 1, n_W
-        do ia = 1, n_atom
-            do ja = 1, n_atom
-                if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle
-                counter = counter + 1
-                W_index(counter) = iw
-                do ix = 1, 3
-                    candidate_translational_operator(ix,counter) = &
-                        atomic_coordinates(ix,ja) - ( &
-                        dble(W(ix,1,iw)) * atomic_coordinates(1,ia) + &
-                        dble(W(ix,2,iw)) * atomic_coordinates(2,ia) + &
-                        dble(W(ix,3,iw)) * atomic_coordinates(3,ia))
-                    candidate_translational_operator(ix,counter) = &
-                        modulo(candidate_translational_operator(ix,counter),1.d0)
-                    if(abs(candidate_translational_operator(ix,counter) - 1.d0) .lt. atomic_tol) &
-                        candidate_translational_operator(ix,counter) = 0.d0
-                enddo
-                ! if(debug) write(6,'(i6,3f16.9)') &
-                !     counter, candidate_translational_operator(1:3,counter)
+    
+    ! When there are more than 500 atoms just use brute force search.
+    if(n_atom .lt. 500) then
+        allocate(n_atom_per_species(n_species))
+        n_atom_per_species(:) = 0
+        do is = 1, n_species
+            do ia = 1, n_atom
+                if(atomic_species_index(ia) .eq. is) &
+                    n_atom_per_species(is) = n_atom_per_species(is) + 1
             enddo
         enddo
-    enddo
+
+        n_candidates = 0
+        do is = 1, n_species
+            n_candidates = &
+                n_candidates + n_atom_per_species(is)*n_atom_per_species(is)
+        enddo
+        n_candidates = n_candidates * n_W
+        allocate(candidate_translational_operator(3,n_candidates), is_symmetric(n_candidates))
+        allocate(W_index(n_candidates))
+
+        ! Find candidate translational operator from other atoms of the same species
+        counter = 0
+        if(debug) write(6,*) "findTranslationalSymmetry: candidate_translational_operators"
+        do iw = 1, n_W
+            do ia = 1, n_atom
+                do ja = 1, n_atom
+                    if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle
+                    counter = counter + 1
+                    W_index(counter) = iw
+                    do ix = 1, 3
+                        candidate_translational_operator(ix,counter) = &
+                            atomic_coordinates(ix,ja) - ( &
+                            dble(W(ix,1,iw)) * atomic_coordinates(1,ia) + &
+                            dble(W(ix,2,iw)) * atomic_coordinates(2,ia) + &
+                            dble(W(ix,3,iw)) * atomic_coordinates(3,ia))
+                        candidate_translational_operator(ix,counter) = &
+                            modulo(candidate_translational_operator(ix,counter),1.d0)
+                        if(abs(candidate_translational_operator(ix,counter) - 1.d0) .lt. atomic_tol) &
+                            candidate_translational_operator(ix,counter) = 0.d0
+                    enddo
+                    ! if(debug) write(6,'(i6,3f16.9)') &
+                    !     counter, candidate_translational_operator(1:3,counter)
+                enddo
+            enddo
+        enddo        
+    else
+        n_candidates = 1728 * n_W
+        allocate(candidate_translational_operator(3,n_candidates))
+        counter = 0
+        do ix = 0, 11;do jx = 0,11;do kx = 0,11
+            counter = counter + 1
+            candidate_translational_operator(1,counter) = dble(ix) / 12.d0
+            candidate_translational_operator(2,counter) = dble(jx) / 12.d0
+            candidate_translational_operator(3,counter) = dble(kx) / 12.d0
+        enddo;enddo;enddo
+    endif
 
     W_match(:) = .false.
     ! Check if the candidate translational operator maps all the atoms to the
@@ -152,11 +167,8 @@ subroutine findTranslationalSymmetry( &
     endif
 
     n_symm_op = count(is_symmetric)
-    if(n_symm_op .gt. 192) then
-        write(6,'(a)') "findTranslationalSymmetry: Too many symmetry operators found"
-        write(6,'(a,i7)') "findTranslationalSymmetry: Number of symmetry operators = ", n_symm_op
-        stop
-    endif
+    allocate(symm_op(3,4,n_symm_op))
+    if(debug) write(6,'(a,i6)') "findTranslationalSymmetry: Number of symmetry operators =", n_symm_op
 
     counter = 0
     do ic = 1, n_candidates

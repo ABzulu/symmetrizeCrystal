@@ -31,8 +31,9 @@ program symmetrizeCrystal
 
     double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
     integer :: &
-        n_symm_op, symm_op(3,4,192), &
+        n_symm_op, &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530)
+    integer, allocatable :: symm_op(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
 

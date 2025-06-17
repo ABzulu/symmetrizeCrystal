@@ -13,7 +13,7 @@ subroutine findDuplicateTranslations( &
     lattice_vectors, symm_op, n_symm_op, debug &
 )
     double precision, intent(in) :: lattice_vectors(3,3)
-    integer, intent(inout) :: symm_op(3,4,192), n_symm_op
+    integer, intent(inout) :: symm_op(3,4,n_symm_op), n_symm_op
     logical, intent(in) :: debug
 
     integer :: ix, jx, kx, iix, io, jo, counter
