@@ -18,7 +18,7 @@ subroutine findDuplicateTranslations( &
 
     integer :: ix, jx, kx, iix, io, jo, counter
     double precision :: lattice_translation(3), delta_t(3)
-    logical :: filter(192)
+    logical :: filter(n_symm_op)
 
     filter(:) = .true.
 
