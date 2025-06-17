@@ -2,13 +2,13 @@ module symmetrize_m
 
     implicit none
 
-    public :: symmetrize_vector, symmetrize_matrix
+    public :: symmetrizeVector, symmetrize_matrix
 
     private
 
 contains
 
-subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
+subroutine symmetrizeVector(n_symm_op, symm_op, tol, vector, debug)
     integer, intent(in) :: n_symm_op, symm_op(3,4,192)
     double precision, intent(in) :: tol
     double precision, intent(inout) :: vector(3)
@@ -17,6 +17,11 @@ subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
     integer :: io, ix, counter
     double precision :: &
         projected_vector(3), symmetric_vector(3)
+
+    if(debug) then
+        write(6,'(a)') "symmetrizeVector: Input vector"
+        write(6,'(3f16.9)') vector(1:3)
+    endif
 
     symmetric_vector(1:3) = 0.d0
     counter = 0
@@ -38,13 +43,19 @@ subroutine symmetrize_vector(n_symm_op, symm_op, tol, vector, debug)
             counter = counter + 1
             symmetric_vector(1:3) = &
                 symmetric_vector(1:3) + projected_vector(1:3)
+            if(debug) then
+                write(6,'(a)') "symmetrizeVector: Symmetry operator used"
+                write(6,'(3i4)') symm_op(1,1:4,io)
+                write(6,'(3i4)') symm_op(2,1:4,io)
+                write(6,'(3i4)') symm_op(3,1:4,io)
+            endif
         endif
     enddo
     symmetric_vector(1:3) = symmetric_vector(1:3) / counter
 
     vector(1:3) = symmetric_vector(1:3)
 
-end subroutine symmetrize_vector
+end subroutine symmetrizeVector
 
 subroutine symmetrize_matrix(n_symm_op, symm_op, matrix, debug)
     integer, intent(in) :: n_symm_op, symm_op(3,4,192)

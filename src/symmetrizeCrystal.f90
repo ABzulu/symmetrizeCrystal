@@ -10,7 +10,7 @@ program symmetrizeCrystal
     use spacegroup_db, only: loadInSpaceGroup
     use identifySpaceGroup_m, only: identifySpaceGroup
     use findDuplicateTranslations_m, only: findDuplicateTranslations
-    use symmetrize_m, only: symmetrize_vector, symmetrize_matrix
+    use symmetrize_m, only: symmetrizeVector, symmetrize_matrix
     use writeOutput_m, only: writeOutput
 
     implicit none
@@ -119,7 +119,9 @@ program symmetrizeCrystal
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
     do ia = 1, n_atom
-        call symmetrize_vector( &
+        if(debug) write(6,'a') "Atomic coordinates being symmetrized"
+        if(debug) write(6,'3f16.9') atomic_coordinates(1:3,ia)
+        call symmetrizeVector( &
             n_symm_op, symm_op, atomic_tol, atomic_coordinates(1:3,ia), debug &
         )
     enddo
