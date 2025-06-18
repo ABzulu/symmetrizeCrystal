@@ -10,7 +10,7 @@ program symmetrizeCrystal
     use spacegroup_db, only: loadInSpaceGroup
     use identifySpaceGroup_m, only: identifySpaceGroup
     use findDuplicateTranslations_m, only: findDuplicateTranslations
-    use symmetrize_m, only: symmetrizeVector, symmetrize_matrix
+    use symmetrizeVector_m, only: symmetrizeVector
     use writeOutput_m, only: writeOutput
 
     implicit none
@@ -32,7 +32,8 @@ program symmetrizeCrystal
     double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
     integer :: &
         n_symm_op, &
-        n_ops(530), rotations(3,3,192,530), translations(3,192,530)
+        n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530), &
+        wyckoff_sites(3,4,192,530), n_sites(530)
     integer, allocatable :: symm_op(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
@@ -59,6 +60,10 @@ program symmetrizeCrystal
     )
 
     if(debug) write(6,'(a)') "Checkpoint: Read input"
+
+    call loadInSpaceGroup( &
+        n_ops, rotations, translations, hall_symbol, ITA_index, wyckoff_sites, n_sites &
+    )
 
     original_atomic_tol = atomic_tol
     do ir = 1, maxIteration
@@ -93,8 +98,6 @@ program symmetrizeCrystal
         call findDuplicateTranslations( &
             ITA_lattice_vectors, symm_op, n_symm_op, debug &
         )
-
-        call loadInSpaceGroup(n_ops, rotations, translations, hall_symbol)
 
         call identifySpaceGroup( &
             symm_op, n_symm_op, &

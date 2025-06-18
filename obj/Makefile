@@ -18,7 +18,7 @@ OBJECTS=inlineoptions_m.o input_m.o f2kcli.o m_getopts.o  \
 	calculatereciprocallattice_m.o niggliReduction_m.o findRotationalSymmetry_m.o \
 	identifyCrystal_m.o toITAConventionalCell_m.o restricAtomicCoordinates_m.o \
 	findTranslationalSymmetry_m.o spacegroup_db.o identifySpaceGroup_m.o \
-	findDuplicateTranslations.o symmetrize_m.o writeOutput_m.o
+	findDuplicateTranslations.o symmetrizeVector_m.o writeOutput_m.o
 FDF=libfdf.a
 
 all: $(MAINEXE)
@@ -45,7 +45,7 @@ findTranslationalSymmetry_m.o:
 spacegroup_db.o:
 identifySpaceGroup_m.o: constants.o
 findDuplicateTranslations.o: constants.o
-symmetrize_m.o:
+symmetrizeVector_m.o:
 writeOutput_m.o: constants.o calculatereciprocallattice_m.o
 spacegroup_db.o: spacegroup_db.f90
 	$(FC) -O0 $(IFLAGS) $(MDFLAGS) -c $<
