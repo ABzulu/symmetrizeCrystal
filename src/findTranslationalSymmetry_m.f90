@@ -179,6 +179,7 @@ subroutine findTranslationalSymmetry( &
         do ix = 1, 3
             symm_op(ix,1:3,counter) = W(ix,1:3,W_index(ic))
             symm_op(ix,4,counter) = nint(12.d0*candidate_translational_operator(ix,ic))
+            if(symm_op(ix,4,counter) .eq. 12) symm_op(ix,4,counter) = 0
         enddo
     enddo
 
