@@ -23,8 +23,8 @@ subroutine getInlineOptions( &
     logical, external :: makedirqq
 
     maxIteration = 100
-    lattice_tol = 1.0d-3
-    atomic_tol = 1.0d-5
+    lattice_tol = 1.0d-2
+    atomic_tol = 1.0d-4
     output_filename = "symmetrizedStructure.out"
     debug = .false.
 

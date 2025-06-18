@@ -31,6 +31,14 @@ subroutine findRotationalSymmetry( &
             lattice_vectors(ix,2) * lattice_vectors(jx,2) + &
             lattice_vectors(ix,3) * lattice_vectors(jx,3)
     enddo;enddo
+    G(1:3,1:3) = G(1:3,1:3) / maxval([G(1,1), G(2,2), G(3,3)])
+
+    if(debug) then
+        write(6,'(a)') "findRotationalSymmetry: Metric G"
+        write(6,'(3f16.9)') G(1,1:3)
+        write(6,'(3f16.9)') G(2,1:3)
+        write(6,'(3f16.9)') G(3,1:3)
+    endif
 
     W = 0
     n_W = 0
@@ -70,10 +78,11 @@ subroutine findRotationalSymmetry( &
                     temp_G(i,3) * ROT(3,j)
             enddo
         enddo
+        G_tilda(1:3,1:3) = G_tilda(1:3,1:3) / maxval([G(1,1), G(2,2), G(3,3)])
 
         ! Diagonal elements represent lengths
         do i = 1, 3
-            diag(i) = abs(G_tilda(i,i) - G(i,i))
+            diag(i) = abs(G_tilda(i,i) - G(i,i))/G(3,3)
         enddo
         ! Off-diagonal elements represent angles
         ! https://arxiv.org/html/1808.01590v2 Section V.1 Step(f)
@@ -89,14 +98,22 @@ subroutine findRotationalSymmetry( &
                     acos(max(-1.d0,min(1.d0,cos2)))
                 off_diag(icounter) = &
                     sin(abs(theta))*sqrt(0.25d0*(G_tilda(i,i)+G(i,i))*(G_tilda(j,j)+G(j,j)))
+                off_diag(icounter) = off_diag(icounter) / G(3,3)
             enddo
         enddo
-        ! if(debug) write(6,*) "findRotationalSymmetry: diag, off_diag"
+        ! if(debug) write(6,'(a)') "findRotationalSymmetry: diag, off_diag"
         ! if(debug) write(6,'(3f16.9)') diag(1:3)
         ! if(debug) write(6,'(3f16.9)') off_diag(1:3)
         ! if(debug) write(6,'(3f16.9)') off_diag(4:6)
         if(((maxval(diag)/sqrt(G(3,3))) .gt. lattice_tol) .or. &
            ((maxval(off_diag)/sqrt(G(3,3))) .gt. lattice_tol)) cycle
+
+        if(debug) then
+            write(6,'(a)') "findRotationalSymmetry: WGW^T"
+            write(6,'(3f16.9)') G_tilda(1,1:3)
+            write(6,'(3f16.9)') G_tilda(2,1:3)
+            write(6,'(3f16.9)') G_tilda(3,1:3)
+        endif
 
         n_W = n_W + 1
         if(n_W .gt. 48) then

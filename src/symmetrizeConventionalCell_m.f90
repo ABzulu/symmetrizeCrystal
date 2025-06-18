@@ -29,12 +29,21 @@ subroutine symmetrizeConventionalCell( &
     double precision, allocatable :: temp_atomic_coordintes(:,:)
     logical, allocatable          :: assigned(:)
 
+    if(debug) then
+        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates"
+        do ia = 1, n_atom
+            write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
+        enddo
+    endif
+
     allocate(site_index(n_atom), assigned(n_atom))
 
-    site_index = 0
+    site_index(:) = 0
+    assigned(:) = .false.
     ! Check which atoms are grouped into same sites
     do ia = 1, n_atom
         do ja = 1, n_atom
+            if(atomic_species_index(ia) .ne. atomic_species_index(ja)) cycle
             do io = 1, n_symm_op
                 do ix = 1, 3
                     image(ix) = &
@@ -44,8 +53,6 @@ subroutine symmetrizeConventionalCell( &
                         dble(symm_op(ix,4,io)) / 12.d0
                     image(ix) = modulo(image(ix)+0.5d0,1.d0) - 0.5d0
                 enddo            
-
-                if(atomic_species_index(ia) .ne. atomic_species_index(ja)) cycle
 
                 distance = 0
                 do ix = 1, 3
@@ -70,7 +77,12 @@ subroutine symmetrizeConventionalCell( &
                         site_index(ia) = site_index(ja)
                         assigned(ia) = .true.
                     elseif (site_index(ia) .ne. site_index(ja)) then
-                        write(6,'(a)') "symmetrizeConventionalCell: Site index mismatch; Stopping program"
+                        write(6,'(a)') "symmetrizeConventionalCell: Site index mismatch"
+                        write(6,'(a,2i6)') "symmetrizeConventionalCell: ia, ja = ", ia, ja
+                        write(6,'(a,3f16.9)') "symmetrizeConventionalCell: image = ", image(1:3)
+                        write(6,'(a,6i6)') "symmetrizeConventionalCell: site_index(:) = ", site_index(:)
+                        write(6,'(a,6L6)') "symmetrizeConventionalCell: assigned(:) =   ", assigned(:)
+                        write(6,'(a)') "symmetrizeConventionalCell: Stopping program"
                         stop
                     endif
                 endif

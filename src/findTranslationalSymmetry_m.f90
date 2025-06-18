@@ -65,7 +65,7 @@ subroutine findTranslationalSymmetry( &
                             dble(W(ix,3,iw)) * atomic_coordinates(3,ia))
                         candidate_translational_operator(ix,counter) = &
                             modulo(candidate_translational_operator(ix,counter),1.d0)
-                        if(abs(candidate_translational_operator(ix,counter) - 1.d0) .lt. atomic_tol) &
+                        if(abs(candidate_translational_operator(ix,counter) - 1.d0) .lt. eps16) &
                             candidate_translational_operator(ix,counter) = 0.d0
                     enddo
                     ! if(debug) write(6,'(i6,3f16.9)') &
