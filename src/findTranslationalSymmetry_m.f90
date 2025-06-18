@@ -186,10 +186,10 @@ subroutine findTranslationalSymmetry( &
     write(6,*) "findTranslationalSymmetry: n_symm_op =", n_symm_op
     write(6,*) "findTranslationalSymmetry: symm_op"
     do ic = 1, n_symm_op
-        write(6,*) "symmetry operator index", ic
-        write(6,'(4i4)') symm_op(1,1:4,ic)
-        write(6,'(4i4)') symm_op(2,1:4,ic)
-        write(6,'(4i4)') symm_op(3,1:4,ic)
+        if(debug) write(6,*) "symmetry operator index", ic
+        if(debug) write(6,'(4i4)') symm_op(1,1:4,ic)
+        if(debug) write(6,'(4i4)') symm_op(2,1:4,ic)
+        if(debug) write(6,'(4i4)') symm_op(3,1:4,ic)
     enddo
 
     deallocate(n_atom_per_species)
