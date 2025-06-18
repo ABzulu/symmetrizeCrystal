@@ -276,7 +276,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
         stop
     endif
 
-    write(6,'(a,a)') "identifyCrystal: Crystal type = ", crystal_type
+    write(6,'(a,a)') "identifyCrystal: Crystal type = ", trim(crystal_type)
 
 end subroutine identifyCrystal
 
