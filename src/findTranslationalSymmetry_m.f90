@@ -22,7 +22,7 @@ subroutine findTranslationalSymmetry( &
 
     integer :: is, n_candidates, ia, ja, iw, ix, jx, kx, counter, ic
     integer, allocatable :: n_atom_per_species(:), W_index(:)
-    double precision :: delta_x(3)
+    double precision :: delta_x(3), distance
     double precision, allocatable :: candidate_translational_operator(:,:)
     logical :: found_match, W_match(48)
     logical, allocatable :: is_symmetric(:)
@@ -124,7 +124,12 @@ subroutine findTranslationalSymmetry( &
 
                 ! if(debug) write(6,'(a,3i6,3f16.9)') &
                 !     "ic, ia, ja, delta_x = ", ic, ia, ja, delta_x(1:3)
-                if(maxval(delta_x) .lt. atomic_tol) then
+                distance = 0
+                do ix = 1, 3
+                    distance = distance + delta_x(ix)*delta_x(ix)
+                enddo
+                distance = sqrt(distance)
+                if(distance .lt. atomic_tol) then
                     found_match = .true.
                     ! if(debug) write(6,'(a)') "Found matching atoms"
                     exit

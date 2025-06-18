@@ -138,8 +138,9 @@ subroutine symmetrizeConventionalCell( &
                     endif
                 enddo
 
-                if(distance .lt. tol) then
+                if(distance .gt. tol) then
                     write(6,'(a)') "symmetrizeConventionalCell: Warning! Distance between image and closest atom larger than tolerance!"
+                    write(6,'(a,2f16.9)') "symmetrizeConventionalCell: distance, tol = ", distance, tol
                 endif
                 n_matching_images(matching_atom_site_index) = &
                     n_matching_images(matching_atom_site_index) + 1
