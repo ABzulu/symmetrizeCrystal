@@ -10,7 +10,7 @@ program symmetrizeCrystal
     use spacegroup_db, only: loadInSpaceGroup
     use identifySpaceGroup_m, only: identifySpaceGroup
     use findDuplicateTranslations_m, only: findDuplicateTranslations
-    use symmetrizeVector_m, only: symmetrizeVector
+    use symmetrizeConventionalCell_m, only: symmetrizeConventionalCell
     use writeOutput_m, only: writeOutput
 
     implicit none
@@ -31,14 +31,14 @@ program symmetrizeCrystal
 
     double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
     integer :: &
-        n_symm_op, &
+        n_symm_op, n_site_letters, &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530), &
         wyckoff_sites(3,4,192,530), n_sites(530)
     integer, allocatable :: symm_op(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
 
-    integer :: ia, ir
+    integer :: ir
 
     ! Read in command line options and inputs
     call getInlineOptions( &
@@ -111,23 +111,20 @@ program symmetrizeCrystal
             write(6,'(a)') "Could not find space group, relaxing tolerance"
         endif
 
-        atomic_tol = atomic_tol * 10.d0
+        atomic_tol = atomic_tol * 2.d0
         if(atomic_tol .gt. 0.1d0) then
             atomic_tol = original_atomic_tol
-            lattice_tol = lattice_tol * 10.d0
+            lattice_tol = lattice_tol * 2.d0
         endif
             
     enddo
 
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
-    do ia = 1, n_atom
-        if(debug) write(6,'(a)') "Atomic coordinates being symmetrized"
-        if(debug) write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
-        call symmetrizeVector( &
-            n_symm_op, symm_op, atomic_tol, atomic_coordinates(1:3,ia), debug &
-        )
-    enddo
+    call symmetrizeConventionalCell( &
+        ITA_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
+        n_symm_op, symm_op, n_site_letters, wyckoff_sites, atomic_tol, debug &
+    )
 
     if(debug) write(6,'(a)') "Checkpoint: Symmetrized structure"
 
