@@ -31,9 +31,8 @@ program symmetrizeCrystal
 
     double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
     integer :: &
-        n_symm_op, n_site_letters, &
-        n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530), &
-        wyckoff_sites(3,4,192,530), n_sites(530)
+        n_symm_op, &
+        n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530)
     integer, allocatable :: symm_op(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
@@ -62,7 +61,7 @@ program symmetrizeCrystal
     if(debug) write(6,'(a)') "Checkpoint: Read input"
 
     call loadInSpaceGroup( &
-        n_ops, rotations, translations, hall_symbol, ITA_index, wyckoff_sites, n_sites &
+        n_ops, rotations, translations, hall_symbol, ITA_index &
     )
 
     original_atomic_tol = atomic_tol
