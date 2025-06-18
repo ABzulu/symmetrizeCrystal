@@ -55,10 +55,6 @@ subroutine readInput( &
         enddo
     endif
 
-    do ia = 1, n_atom
-        write(6,'(3f16.9,i4)') atomic_coordinates(1:3,ia), atomic_species_index(ia)
-    enddo 
-
 end subroutine readInput
 
 subroutine formatInput( &
@@ -107,9 +103,9 @@ subroutine formatInput( &
     endif
 
     if(debug) then
-        write(6,*) "Atomic coordinates after formatting"
+        write(6,'(a)') "fomatInput: Atomic coordinates in Bohr"
         do ia = 1, n_atom
-            write(6,*) atomic_coordinates(1:3,ia)
+            write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         enddo
     endif
 

@@ -51,14 +51,14 @@ subroutine restricAtomicCoordinates( &
     call calculateReciprocalLattice(modifyed_lattice_vectors, reciprocal_lattice_vectors, 0)
 
     if(debug) then
-        write(6,*) "restricAtomicCoordinates: Atomic coordinates before restriction"
+        write(6,'(a)') "restricAtomicCoordinates: Atomic coordinates before restriction"
         do ia = 1, n_atom
             write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         enddo
     endif
 
-    if(debug) write(6,*) "restricAtomicCoordinates: Atomic coordinates in fractional coordinate"
-    if(debug) write(6,*) "restricAtomicCoordinates: with restriction -0.5 < x <= 0.5"
+    if(debug) write(6,'(a)') "restricAtomicCoordinates: Atomic coordinates in fractional coordinate"
+    if(debug) write(6,'(a)') "restricAtomicCoordinates: with restriction -0.5 < x <= 0.5"
     do ia = 1, n_atom
         temp_atomic_coordinate(1:3) = atomic_coordinates(1:3,ia)
         do i = 1, 3

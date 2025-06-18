@@ -34,7 +34,7 @@ subroutine findRotationalSymmetry( &
 
     W = 0
     n_W = 0
-    if(debug) write(6,*) "findRotationalSymmetry: candidate W"
+    ! if(debug) write(6,'(a)') "findRotationalSymmetry: Candidate W"
     do i11 = -2,2; do i12 = -2,2; do i13 = -2,2
     do i21 = -2,2; do i22 = -2,2; do i23 = -2,2
     do i31 = -2,2; do i32 = -2,2; do i33 = -2,2
@@ -106,7 +106,8 @@ subroutine findRotationalSymmetry( &
         W(1:3,1:3,n_W) = ROT(1:3,1:3)
 
         if(debug) then
-            write(6,*) "findRotationalSymmetry: n_W", n_W
+            write(6,'(a)') "findRotationalSymmetry: Found symmetric rotational operators"
+            write(6,'(a,i4)') "findRotationalSymmetry: Rotational operator index = ", n_W
             write(6,'(3i6)') W(1,1:3,n_W)
             write(6,'(3i6)') W(2,1:3,n_W)
             write(6,'(3i6)') W(3,1:3,n_W)

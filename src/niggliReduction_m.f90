@@ -31,7 +31,7 @@ subroutine niggliReduction( &
         enddo;enddo
 
         if(debug) then
-            if(debug) write(6,'(a)') "niggliReduction: Lattice vectors"
+            if(debug) write(6,'(a,i4)') "niggliReduction: Lattice vectors for iteration", it
             write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
             write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
             write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
@@ -142,7 +142,7 @@ subroutine niggliReduction( &
     enddo
 
     if(debug) then
-        write(6,'(a)') "niggliReduction: lattice vectors after Niggli reduction"
+        write(6,'(a)') "niggliReduction: Lattice vectors after Niggli reduction"
         write(6,'(3f16.9)') reduced_lattice_vectors(1,1:3)
         write(6,'(3f16.9)') reduced_lattice_vectors(2,1:3)
         write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)

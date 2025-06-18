@@ -68,12 +68,7 @@ subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
             stop
         endif
 
-        write(6,'(a,2i4)') "identifyCrystal: W index, W type = ", iw, W_type(iw)
-        if(debug) then
-            do ix = 1, 3
-                write(6,'(3i4)') W(ix,1:3,iw)
-            enddo
-        endif
+        if(debug) write(6,'(a,2i4)') "identifyCrystal: W index, W type = ", iw, W_type(iw)
     enddo
 
     write(6,'(a39,10i3)') "identifyCrystal: Type of W            |", -6, -4, -3, -2, -1, 1, 2, 3, 4, 6

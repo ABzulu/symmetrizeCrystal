@@ -50,7 +50,7 @@ subroutine findTranslationalSymmetry( &
 
         ! Find candidate translational operator from other atoms of the same species
         counter = 0
-        if(debug) write(6,*) "findTranslationalSymmetry: candidate_translational_operators"
+        ! if(debug) write(6,'(a)') "findTranslationalSymmetry: candidate_translational_operators"
         do iw = 1, n_W
             do ia = 1, n_atom
                 do ja = 1, n_atom
@@ -88,7 +88,7 @@ subroutine findTranslationalSymmetry( &
     W_match(:) = .false.
     ! Check if the candidate translational operator maps all the atoms to the
     ! same species of atoms.
-    if(debug) write(6,*) "findTranslationalSymmetry: delta_x"
+    ! if(debug) write(6,*) "findTranslationalSymmetry: delta_x"
     is_symmetric(:) = .false.
     do ic = 1, n_candidates
         if(debug) then
@@ -103,7 +103,7 @@ subroutine findTranslationalSymmetry( &
                 (W(2,3,W_index(ic)) .eq. 0) .and. &
                 (W(3,2,W_index(ic)) .eq. 0) &
             ) then
-                write(6,'(a,3f16.9)') "Candidate translation operator", candidate_translational_operator(1:3,ic)
+                ! write(6,'(a,3f16.9)') "Candidate translation operator", candidate_translational_operator(1:3,ic)
             endif
         endif
         do ia = 1, n_atom
@@ -146,7 +146,7 @@ subroutine findTranslationalSymmetry( &
         else
             is_symmetric(ic) = .true.
             if(.not. W_match(W_index(ic))) W_match(W_index(ic)) = .true.
-            if(debug) write(6,'(a)') "Found matching symmetry operator"
+            ! if(debug) write(6,'(a)') "Found matching symmetry operator"
         endif
     enddo
 
@@ -188,10 +188,10 @@ subroutine findTranslationalSymmetry( &
         enddo
     enddo
 
-    write(6,*) "findTranslationalSymmetry: n_symm_op =", n_symm_op
-    write(6,*) "findTranslationalSymmetry: symm_op"
+    write(6,'(a,i6)') "findTranslationalSymmetry: n_symm_op =", n_symm_op
+    write(6,'(a)') "findTranslationalSymmetry: symm_op"
     do ic = 1, n_symm_op
-        if(debug) write(6,*) "symmetry operator index", ic
+        if(debug) write(6,'(a,i6)') "symmetry operator index", ic
         if(debug) write(6,'(4i4)') symm_op(1,1:4,ic)
         if(debug) write(6,'(4i4)') symm_op(2,1:4,ic)
         if(debug) write(6,'(4i4)') symm_op(3,1:4,ic)
