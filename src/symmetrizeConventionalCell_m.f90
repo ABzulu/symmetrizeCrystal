@@ -15,7 +15,7 @@ subroutine symmetrizeConventionalCell( &
     integer, intent(in)          :: &
         n_atom, atomic_species_index(n_atom), &
         n_symm_op, symm_op(3,4,192)
-    double precision, intent(in) :: tol
+    double precision, intent(in) :: tol(3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
     logical, intent(in)          :: debug
 
@@ -54,16 +54,11 @@ subroutine symmetrizeConventionalCell( &
                     image(ix) = modulo(image(ix)+0.5d0,1.d0) - 0.5d0
                 enddo            
 
-                distance = 0
-                do ix = 1, 3
-                    distance = &
-                        distance + &
-                        (image(ix) - atomic_coordinates(ix,ja)) * &
-                        (image(ix) - atomic_coordinates(ix,ja))
-                enddo
-                distance = sqrt(distance)
-
-                if(distance .lt. tol) then
+                if( &
+                    ((image(1) - atomic_coordinates(1,ja)) .lt. tol(1)) .and. &
+                    ((image(2) - atomic_coordinates(2,ja)) .lt. tol(3)) .and. &
+                    ((image(3) - atomic_coordinates(3,ja)) .lt. tol(2)) &
+                ) then
                     if (.not. assigned(ia) .and. .not. assigned(ja)) then
                         n_sites_found = n_sites_found + 1
                         site_index(ia) = n_sites_found
@@ -145,12 +140,17 @@ subroutine symmetrizeConventionalCell( &
 
                     if(temp_distance .lt. distance) then
                         distance = temp_distance
+                        temp_atomic_coordintes(1:3,1) = atomic_coordinates(ix,jja)
                         matching_atom_index = jja
                         matching_atom_site_index = ja
                     endif
                 enddo
 
-                if(distance .gt. tol) then
+                if( &
+                    ((temp_atomic_coordintes(1,1) - image(1)) .gt. tol(1)) .or. &
+                    ((temp_atomic_coordintes(2,1) - image(2)) .gt. tol(2)) .or. &
+                    ((temp_atomic_coordintes(3,1) - image(3)) .gt. tol(3)) &
+                ) then
                     write(6,'(a)') "symmetrizeConventionalCell: Warning! Distance between image and closest atom larger than tolerance!"
                     write(6,'(a,2f16.9)') "symmetrizeConventionalCell: distance, tol = ", distance, tol
                 endif
