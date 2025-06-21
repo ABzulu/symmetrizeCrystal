@@ -42,9 +42,9 @@ subroutine findDuplicateSymmetryOperators( &
                 delta_t(iix) = symm_op(iix,4,io) - symm_op(iix,4,jo)
             enddo
 
-            do ix = -12, 12
-                do jx = -12, 12
-                    do kx = -12, 12
+            do ix = -3, 3
+                do jx = -3, 3
+                    do kx = -3, 3
                         do iix = 1, 3
                             lattice_translation(iix) = &
                                 ix * lattice_vectors(1,iix) + &
@@ -59,7 +59,7 @@ subroutine findDuplicateSymmetryOperators( &
                         ) then
                             if(debug) then
                                 write(6,'(a)') "findDuplicateSymmetryOperators: Equivalent translation found for"
-                                write(6,'(a,i4,a,i4)') "findDuplicateSymmetryOperators: ", io, " and ", jo
+                                write(6,'(a,i8,a,i8)') "findDuplicateSymmetryOperators: ", io, " and ", jo
                             endif
 
                             if( &
@@ -89,16 +89,16 @@ subroutine findDuplicateSymmetryOperators( &
     enddo
     n_symm_op = count(filter(1:n_symm_op))
 
-    if(debug) then
-        write(6,'(a)') "findDuplicateSymmetryOperators: Symmetry operators after removing duplicates"
-        write(6,'(a,i5)') "findDuplicateSymmetryOperators: Number of operators =", n_symm_op
-        do io = 1, n_symm_op
-            write(6,'(a,i5)') "findDuplicateSymmetryOperators: Index = ", io
-            write(6,'(4i4)') symm_op(1,1:4,io)
-            write(6,'(4i4)') symm_op(2,1:4,io)
-            write(6,'(4i4)') symm_op(3,1:4,io)
-        enddo
-    endif
+    ! if(debug) then
+    !     write(6,'(a)') "findDuplicateSymmetryOperators: Symmetry operators after removing duplicates"
+    !     write(6,'(a,i5)') "findDuplicateSymmetryOperators: Number of operators =", n_symm_op
+    !     do io = 1, n_symm_op
+    !         write(6,'(a,i5)') "findDuplicateSymmetryOperators: Index = ", io
+    !         write(6,'(4i4)') symm_op(1,1:4,io)
+    !         write(6,'(4i4)') symm_op(2,1:4,io)
+    !         write(6,'(4i4)') symm_op(3,1:4,io)
+    !     enddo
+    ! endif
 
 end subroutine findDuplicateSymmetryOperators
 

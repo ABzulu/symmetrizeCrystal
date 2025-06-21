@@ -6,11 +6,10 @@ program symmetrizeCrystal
     use identifyCrystal_m, only: identifyCrystal
     use toITAConventionalCell_m, only: toITAConventionalCell
     use restricAtomicCoordinates_m, only: restricAtomicCoordinates
-    use findTranslationalSymmetry_m, only: findTranslationalSymmetry
+    use findSymmetryOperators_m, only: findSymmetryOperators
     use spacegroup_db, only: loadInSpaceGroup
     use identifySpaceGroup_m, only: identifySpaceGroup
-    use findDuplicateTranslations_m, only: findDuplicateTranslations
-    use symmetrizeConventionalCell_m, only: symmetrizeConventionalCell
+    use symmetrizeStructure_m, only: symmetrizeStructure
     use writeOutput_m, only: writeOutput
 
     implicit none
@@ -68,20 +67,20 @@ program symmetrizeCrystal
         lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
     )
 
-    call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
+    call findRotationalSymmetry(lattice_vectors, lattice_tol, W, n_W, debug)
 
     call identifyCrystal(W, n_W, W_type, crystal_type, debug)
 
     if(debug) write(6,'(a)') "Checkpoint: Determined point group"
 
-    call toITAConventionalCell( &
-        crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
-    )
+    ! call toITAConventionalCell( &
+    !     crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
+    ! )
 
-    call findRotationalSymmetry(ITA_lattice_vectors, lattice_tol, W, n_W, debug)
+    call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
 
     call restricAtomicCoordinates( &
-        ITA_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
+        reduced_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
     )
 
     original_atomic_tol = atomic_tol(1)
@@ -89,21 +88,18 @@ program symmetrizeCrystal
         atomic_tol(ix) = &
             original_atomic_tol / &
             sqrt( &
-                ITA_lattice_vectors(ix,1)*ITA_lattice_vectors(ix,1) + &
-                ITA_lattice_vectors(ix,2)*ITA_lattice_vectors(ix,2) + &
-                ITA_lattice_vectors(ix,3)*ITA_lattice_vectors(ix,3) &
+                reduced_lattice_vectors(ix,1)*reduced_lattice_vectors(ix,1) + &
+                reduced_lattice_vectors(ix,2)*reduced_lattice_vectors(ix,2) + &
+                reduced_lattice_vectors(ix,3)*reduced_lattice_vectors(ix,3) &
             )
     enddo
 
     if(debug) write(6,'(a)') "Checkpoint: Made compatible structure"
 
-    call findTranslationalSymmetry( &
+    call findSymmetryOperators( &
+        reduced_lattice_vectors, &
         n_atom, atomic_coordinates, n_species, atomic_species_index, & 
         atomic_tol, n_W, W, n_symm_op, symm_op, debug &
-    )
-
-    call findDuplicateTranslations( &
-        ITA_lattice_vectors, symm_op, n_symm_op, debug &
     )
 
     call identifySpaceGroup( &
@@ -120,8 +116,8 @@ program symmetrizeCrystal
             
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
-    call symmetrizeConventionalCell( &
-        ITA_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
+    call symmetrizeStructure( &
+        reduced_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
         n_symm_op, symm_op, atomic_tol, debug &
     )
 
@@ -130,7 +126,7 @@ program symmetrizeCrystal
     call writeOutput( &
         lattice_constant, lattice_vectors, &
         n_atom, atomic_coordinates_format, atomic_coordinates, atomic_species_index, &
-        ITA_lattice_vectors, output_filename &
+        reduced_lattice_vectors, output_filename &
     )
 
     ! Deallocate all allocatable arrays

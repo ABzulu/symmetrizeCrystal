@@ -1,38 +1,41 @@
-module symmetrizeConventionalCell_m
+module symmetrizeStructure_m
     use constants, only: eps16
 
     implicit none
 
-    public :: symmetrizeConventionalCell
+    public :: symmetrizeStructure
 
     private
 
 contains
 
-subroutine symmetrizeConventionalCell( &
+subroutine symmetrizeStructure( &
     lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
-    n_symm_op, symm_op, tol, debug &
+    n_symmetry_operators, symmetry_operators, tol, debug &
 )
     integer, intent(in)          :: &
         n_atom, atomic_species_index(n_atom), &
-        n_symm_op, symm_op(3,4,192)
+        n_symmetry_operators, symmetry_operators(3,4,192)
     double precision, intent(in) :: lattice_vectors(3,3), tol(3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
     logical, intent(in)          :: debug
 
+    integer              :: counter, ix, iy, iz, ia
+    integer, allocatable :: atom_index(:)
+
     integer                       :: &
-        ia, iia, ja, jja, io, ix, n_sites_found, is, &
+        iia, ja, jja, io, n_sites_found, is, &
         matching_atom_index, matching_atom_site_index
     integer, allocatable          :: &
         site_index(:), n_atoms_per_site(:), atom_index_in_site(:,:), counters(:), &
         n_matching_images(:)
     double precision              :: &
-        image(3), distance, temp_distance, lattice_parameter(3)
-    double precision, allocatable :: temp_atomic_coordintes(:,:)
+        distance, temp_distance, lattice_parameter(3), image(3)
+    double precision, allocatable :: temp_atomic_coordintes(:,:), images(:,:)
     logical, allocatable          :: assigned(:)
 
     if(debug) then
-        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates before symmetrization"
+        write(6,'(a)') "symmetrizeStructure: Atomic coordinates before symmetrization"
         do ia = 1, n_atom
             write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         enddo
@@ -52,56 +55,69 @@ subroutine symmetrizeConventionalCell( &
     site_index(:) = 0
     assigned(:) = .false.
     n_sites_found = 0
-    ! Check which atoms are grouped into same sites
-    do ia = 1, n_atom
-        do ja = 1, n_atom
-            if(atomic_species_index(ia) .ne. atomic_species_index(ja)) cycle
-            do io = 1, n_symm_op
+    allocate(images(3,n_atom*125), atom_index(n_atom*125))
+    
+    do iia = 1, n_atom
+        do io = 1, n_symmetry_operators
+            do ia = 1, n_atom
+                atom_index(ia) = ia
                 do ix = 1, 3
-                    image(ix) = &
-                        dble(symm_op(ix,1,io)) * atomic_coordinates(1,ia) + &
-                        dble(symm_op(ix,2,io)) * atomic_coordinates(2,ia) + &
-                        dble(symm_op(ix,3,io)) * atomic_coordinates(3,ia) + &
-                        dble(symm_op(ix,4,io)) / 12.d0
-                    image(ix) = modulo(image(ix)+0.5d0,1.d0) - 0.5d0
-                enddo            
+                    images(ix,ia) = &
+                        dble(symmetry_operators(ix,1,io)) * atomic_coordinates(1,ia) + &
+                        dble(symmetry_operators(ix,2,io)) * atomic_coordinates(2,ia) + &
+                        dble(symmetry_operators(ix,3,io)) * atomic_coordinates(3,ia) + &
+                        dble(symmetry_operators(ix,4,io))/12.d0
+                enddo
+            enddo
 
+            ! Make supercell from the image
+            counter = n_atom
+            do ix = -2, 2;do iy = -2, 2;do iz = -2, 2
+                if((ix .eq. 0) .and. (iy .eq. 0) .and. (iz .eq. 0)) cycle
+                do ia = 1, n_atom
+                    counter = counter + 1
+                    atom_index(counter) = ia
+                    images(1,counter) = images(1,ia) + ix
+                    images(2,counter) = images(2,ia) + iy
+                    images(3,counter) = images(3,ia) + iz
+                enddo          
+            enddo;enddo;enddo
+
+            do ja = 1, n_atom*125
+                if(atomic_species_index(iia) .ne. atomic_species_index(atom_index(ja))) cycle
                 if( &
-                    (abs(image(1) - atomic_coordinates(1,ja)) .lt. tol(1)) .and. &
-                    (abs(image(2) - atomic_coordinates(2,ja)) .lt. tol(3)) .and. &
-                    (abs(image(3) - atomic_coordinates(3,ja)) .lt. tol(2)) &
+                    (abs(images(1,ja) - atomic_coordinates(1,iia)) .lt. tol(1)) .and. &
+                    (abs(images(2,ja) - atomic_coordinates(2,iia)) .lt. tol(2)) .and. &
+                    (abs(images(3,ja) - atomic_coordinates(3,iia)) .lt. tol(3)) &
                 ) then
-                    if (.not. assigned(ia) .and. .not. assigned(ja)) then
+                    if (.not. assigned(iia) .and. .not. assigned(atom_index(ja))) then
                         n_sites_found = n_sites_found + 1
-                        site_index(ia) = n_sites_found
-                        site_index(ja) = n_sites_found
-                        assigned(ia) = .true.
-                        assigned(ja) = .true.
-                    elseif (assigned(ia) .and. .not. assigned(ja)) then
-                        site_index(ja) = site_index(ia)
-                        assigned(ja) = .true.
-                    elseif (.not. assigned(ia) .and. assigned(ja)) then
-                        site_index(ia) = site_index(ja)
-                        assigned(ia) = .true.
-                    elseif (site_index(ia) .ne. site_index(ja)) then
-                        write(6,'(a)') "symmetrizeConventionalCell: Site index mismatch"
-                        write(6,'(a,2i6)') "symmetrizeConventionalCell: ia, ja = ", ia, ja
-                        write(6,'(a,3f16.9)') "symmetrizeConventionalCell: image = ", image(1:3)
-                        write(6,'(a,6i6)') "symmetrizeConventionalCell: site_index(:) = ", site_index(:)
-                        write(6,'(a,6L6)') "symmetrizeConventionalCell: assigned(:) =   ", assigned(:)
-                        write(6,'(a)') "symmetrizeConventionalCell: Stopping program"
+                        site_index(iia) = n_sites_found
+                        site_index(atom_index(ja)) = n_sites_found
+                        assigned(iia) = .true.
+                        assigned(atom_index(ja)) = .true.
+                    elseif (assigned(iia) .and. .not. assigned(atom_index(ja))) then
+                        site_index(atom_index(ja)) = site_index(iia)
+                        assigned(atom_index(ja)) = .true.
+                    elseif (.not. assigned(iia) .and. assigned(atom_index(ja))) then
+                        site_index(iia) = site_index(atom_index(ja))
+                        assigned(iia) = .true.
+                    elseif (site_index(iia) .ne. site_index(atom_index(ja))) then
+                        write(6,'(a)') "symmetrizeStructure: Site index mismatch"
+                        write(6,'(a,2i6)') "symmetrizeStructure: iia, ja = ", iia, ja
+                        write(6,'(a,3f16.9)') "symmetrizeStructure: image = ", images(1:3,counter)
+                        write(6,'(a,6i6)') "symmetrizeStructure: site_index(:) = ", site_index(:)
+                        write(6,'(a,6L6)') "symmetrizeStructure: assigned(:) =   ", assigned(:)
+                        write(6,'(a)') "symmetrizeStructure: Stopping program"
                         stop
                     endif
                 endif
-
             enddo
         enddo
     enddo
-
-    if(debug) write(6,'(a,i4)') "symmetrizeConventionalCell: Number of sites found = ", n_sites_found
     
     if(n_sites_found .gt. n_atom) then
-        write(6,'(a)') "symmetrizeConventionalCell: Too much sites found; Stopping program"
+        write(6,'(a)') "symmetrizeStructure: Too much sites found; Stopping program"
         stop
     endif
 
@@ -119,8 +135,8 @@ subroutine symmetrizeConventionalCell( &
 
     if(debug) then
         do is = 1, n_sites_found
-            write(6,'(a,i4)') "symmetrizeConventionalCell: Site index = ", is
-            write(6,'(a)') "symmetrizeConventionalCell: Atoms in site = " 
+            write(6,'(a,i4)') "symmetrizeStructure: Site index = ", is
+            write(6,'(a)') "symmetrizeStructure: Atoms in site = " 
             write(6,'(5i4)') atom_index_in_site(:,is)
         enddo
     endif
@@ -132,13 +148,13 @@ subroutine symmetrizeConventionalCell( &
         n_matching_images(:) = 0
         do ia = 1, n_atoms_per_site(is)
             iia = atom_index_in_site(ia,is)
-            do io = 1, n_symm_op
+            do io = 1, n_symmetry_operators
                 do ix = 1, 3
                     image(ix) = &
-                        dble(symm_op(ix,1,io)) * atomic_coordinates(1,iia) + &
-                        dble(symm_op(ix,2,io)) * atomic_coordinates(2,iia) + &
-                        dble(symm_op(ix,3,io)) * atomic_coordinates(3,iia) + &
-                        dble(symm_op(ix,4,io)) / 12.d0
+                        dble(symmetry_operators(ix,1,io)) * atomic_coordinates(1,iia) + &
+                        dble(symmetry_operators(ix,2,io)) * atomic_coordinates(2,iia) + &
+                        dble(symmetry_operators(ix,3,io)) * atomic_coordinates(3,iia) + &
+                        dble(symmetry_operators(ix,4,io)) / 12.d0
                     image(ix) = modulo(image(ix)+0.5d0,1.d0) - 0.5d0
                     if(image(ix) + 0.5d0 .lt. eps16) image(ix) = 0.5d0
                 enddo
@@ -177,7 +193,7 @@ subroutine symmetrizeConventionalCell( &
             temp_atomic_coordintes(1:3,iia) = &
                 temp_atomic_coordintes(1:3,iia) / dble(n_matching_images(ia))
             if(n_matching_images(ia) .eq. 0) then
-                write(6,'(a)') "symmetrizeConventionalCell: tried to divide by 0"
+                write(6,'(a)') "symmetrizeStructure: tried to divide by 0"
             endif   
         enddo
     enddo
@@ -185,7 +201,7 @@ subroutine symmetrizeConventionalCell( &
     atomic_coordinates(1:3,1:n_atom) = temp_atomic_coordintes(1:3,1:n_atom)
 
     if(debug) then
-        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates after symmetrization"
+        write(6,'(a)') "symmetrizeStructure: Atomic coordinates after symmetrization"
         do ia = 1, n_atom
             write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         enddo
@@ -194,6 +210,6 @@ subroutine symmetrizeConventionalCell( &
     deallocate(site_index, assigned, n_atoms_per_site, atom_index_in_site, counters)
     deallocate(n_matching_images, temp_atomic_coordintes)
 
-end subroutine symmetrizeConventionalCell
+end subroutine symmetrizeStructure
 
-end module symmetrizeConventionalCell_m
+end module symmetrizeStructure_m

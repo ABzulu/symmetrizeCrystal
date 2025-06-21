@@ -27,9 +27,9 @@ subroutine restricAtomicCoordinates( &
 
     do ix = 1, 3;do jx = 1, 3
         T(ix,jx) = &
-            reciprocal_lattice_vectors(ix,1) * modifyed_lattice_vectors(jx,1) + &
-            reciprocal_lattice_vectors(ix,2) * modifyed_lattice_vectors(jx,2) + &
-            reciprocal_lattice_vectors(ix,3) * modifyed_lattice_vectors(jx,3)
+            reciprocal_lattice_vectors(ix,1) * modifyed_lattice_vectors(1,jx) + &
+            reciprocal_lattice_vectors(ix,2) * modifyed_lattice_vectors(2,jx) + &
+            reciprocal_lattice_vectors(ix,3) * modifyed_lattice_vectors(3,jx)
     enddo;enddo
     if(debug) then
         write(6,'(a)') "restrictAtomicCoordinates: T"
@@ -37,15 +37,6 @@ subroutine restricAtomicCoordinates( &
         write(6,'(3f16.9)') T(2,1:3)
         write(6,'(3f16.9)') T(3,1:3)
     endif
-    do ia = 1, n_atom
-        temp_atomic_coordinate(1:3) = atomic_coordinates(1:3,ia)
-        do ix = 1, 3
-            atomic_coordinates(ix,ia) = &
-                T(ix,1) * temp_atomic_coordinate(1) + &
-                T(ix,2) * temp_atomic_coordinate(2) + &
-                T(ix,3) * temp_atomic_coordinate(3)
-        enddo
-    enddo
     ! Change atomic coordinate formats to fractional 
     ! and make the interval -0.5 < x <= 0.5
     call calculateReciprocalLattice(modifyed_lattice_vectors, reciprocal_lattice_vectors, 0)
