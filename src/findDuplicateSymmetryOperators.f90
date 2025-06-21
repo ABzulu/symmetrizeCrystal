@@ -1,15 +1,15 @@
-module findDuplicateTranslations_m
+module findDuplicateSymmetryOperators_m
     use constants, only: eps12
 
     implicit none
 
-    public :: findDuplicateTranslations
+    public :: findDuplicateSymmetryOperators
 
     private
 
 contains
 
-subroutine findDuplicateTranslations( &
+subroutine findDuplicateSymmetryOperators( &
     lattice_vectors, symm_op, n_symm_op, debug &
 )
     double precision, intent(in) :: lattice_vectors(3,3)
@@ -58,8 +58,8 @@ subroutine findDuplicateTranslations( &
                             (dble(delta_t(3))/12.d0 .eq. lattice_translation(3)) &
                         ) then
                             if(debug) then
-                                write(6,'(a)') "findDuplicateTranslations: Equivalent translation found for"
-                                write(6,'(a,i4,a,i4)') "findDuplicateTranslations: ", io, " and ", jo
+                                write(6,'(a)') "findDuplicateSymmetryOperators: Equivalent translation found for"
+                                write(6,'(a,i4,a,i4)') "findDuplicateSymmetryOperators: ", io, " and ", jo
                             endif
 
                             if( &
@@ -90,16 +90,16 @@ subroutine findDuplicateTranslations( &
     n_symm_op = count(filter(1:n_symm_op))
 
     if(debug) then
-        write(6,'(a)') "findDuplicateTranslations: Symmetry operators after removing duplicates"
-        write(6,'(a,i5)') "findDuplicateTranslations: Number of operators =", n_symm_op
+        write(6,'(a)') "findDuplicateSymmetryOperators: Symmetry operators after removing duplicates"
+        write(6,'(a,i5)') "findDuplicateSymmetryOperators: Number of operators =", n_symm_op
         do io = 1, n_symm_op
-            write(6,'(a,i5)') "findDuplicateTranslations: Index = ", io
+            write(6,'(a,i5)') "findDuplicateSymmetryOperators: Index = ", io
             write(6,'(4i4)') symm_op(1,1:4,io)
             write(6,'(4i4)') symm_op(2,1:4,io)
             write(6,'(4i4)') symm_op(3,1:4,io)
         enddo
     endif
 
-end subroutine findDuplicateTranslations
+end subroutine findDuplicateSymmetryOperators
 
-end module findDuplicateTranslations_m
+end module findDuplicateSymmetryOperators_m

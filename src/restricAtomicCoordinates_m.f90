@@ -70,7 +70,7 @@ subroutine restricAtomicCoordinates( &
             atomic_coordinates(i,ia) = &
                 modulo(atomic_coordinates(i,ia)+0.5d0,1.d0) - 0.5d0
             ! This is to take care of exactly 0.5d0 
-            if( atomic_coordinates(i,ia) + 0.5d0 .le. eps16) then
+            if( atomic_coordinates(i,ia) + 0.5d0 .lt. eps16) then
                 atomic_coordinates(i,ia) = 0.5d0
             endif
         enddo

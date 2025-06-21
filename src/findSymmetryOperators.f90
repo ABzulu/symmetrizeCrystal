@@ -1,0 +1,182 @@
+module findSymmetryOperators_m
+    use constants, only: eps16
+    use findDuplicateSymmetryOperators_m, only: findDuplicateSymmetryOperators
+
+    implicit none
+
+    public :: findSymmetryOperators
+
+    private
+
+contains
+
+subroutine findSymmetryOperators( &
+    lattice_vectors, n_atom, atomic_coordinates, n_species, atomic_species_index, &
+    atomic_tol, n_W, W, n_symmetry_operator, symmetry_operator, debug &
+)
+    integer, intent(in)               :: n_atom, n_species, atomic_species_index(n_atom)
+    double precision, intent(in)      :: &
+        lattice_vectors(3,3), atomic_coordinates(3,n_atom), atomic_tol(3)
+    logical, intent(in)               :: debug
+    integer, intent(inout)            :: n_W, W(3,3,48)
+    integer, intent(out)              :: n_symmetry_operator
+    integer, allocatable, intent(out) :: symmetry_operator(:,:,:)
+
+    integer              :: is, ia, n_candidates, counter, iw, ja, ix, ic, jx, kx, iix
+    integer, allocatable :: n_atom_per_species(:), candidate_symmetry_operators(:,:,:)
+    double precision     :: t
+    logical, allocatable :: is_symmetric(:)
+
+    integer                       :: iy, iz
+    double precision, allocatable :: images(:,:)
+    logical                       :: found_match
+    
+    ! When there are more than 500 atoms just use brute force search.
+    if(n_atom .lt. 500) then
+        allocate(n_atom_per_species(n_species))
+        n_atom_per_species(:) = 0
+        do is = 1, n_species
+            do ia = 1, n_atom
+                if(atomic_species_index(ia) .eq. is) &
+                    n_atom_per_species(is) = n_atom_per_species(is) + 1
+            enddo
+        enddo
+
+        n_candidates = 0
+        do is = 1, n_species
+            n_candidates = &
+                n_candidates + n_atom_per_species(is)*n_atom_per_species(is)
+        enddo
+        n_candidates = n_candidates * n_W
+        allocate(candidate_symmetry_operators(3,4,n_candidates), is_symmetric(n_candidates))
+
+        ! Find candidate translational operator from other atoms of the same species
+        counter = 0
+        ! if(debug) write(6,'(a)') "findSymmetryOperators: candidate_translational_operators"
+        do iw = 1, n_W
+            do ia = 1, n_atom
+                do ja = 1, n_atom
+                    if(.not. (atomic_species_index(ia) .eq. atomic_species_index(ja))) cycle
+                    counter = counter + 1
+                    candidate_symmetry_operators(1:3,1:3,counter) = W(1:3,1:3,iw)
+
+                    do ix = 1, 3
+                        t = &
+                            atomic_coordinates(ix,ja) - ( &
+                                dble(W(ix,1,iw)) * atomic_coordinates(1,ia) + &
+                                dble(W(ix,2,iw)) * atomic_coordinates(2,ia) + &
+                                dble(W(ix,3,iw)) * atomic_coordinates(3,ia) &                            
+                            )
+                        t = modulo(t,1.d0)
+                        candidate_symmetry_operators(ix,4,counter) = nint(t * 12.d0)
+                        if(candidate_symmetry_operators(ix,4,counter) .eq. 12) &
+                            candidate_symmetry_operators(ix,4,counter) = 0
+                    enddo
+                enddo
+            enddo
+        enddo
+        
+        call findDuplicateSymmetryOperators( &
+            lattice_vectors, candidate_symmetry_operators, n_candidates, debug &
+        )
+
+        allocate(is_symmetric(n_candidates))
+
+        if(debug) then
+            write(6,'(a,i4)') "findSymmetryOperators: Number of candidates =", n_candidates
+            do ic = 1, n_candidates
+                write(6,'(a,i4)') "findSymmetryOperators: Candidate index =", ic
+                write(6,'(4i4)') candidate_symmetry_operators(1,1:4,ic)
+                write(6,'(4i4)') candidate_symmetry_operators(2,1:4,ic)
+                write(6,'(4i4)') candidate_symmetry_operators(3,1:4,ic)
+            enddo
+        endif
+    else
+        n_candidates = 1728 * n_W
+        allocate(candidate_symmetry_operators(3,4,n_candidates), is_symmetric(n_candidates))
+        counter = 0
+        do iw = 1, n_W
+            do ix = 0, 11;do jx = 0,11;do kx = 0,11
+                counter = counter + 1
+                do iix = 1, 3
+                    candidate_symmetry_operators(iix,1:3,counter) = W(iix,1:3,iw)
+                enddo
+                candidate_symmetry_operators(1,4,counter) = ix
+                candidate_symmetry_operators(2,4,counter) = jx
+                candidate_symmetry_operators(3,4,counter) = kx
+            enddo;enddo;enddo
+        enddo
+        if(debug) write(6,'(a)') "findSymmetryOperators: Searching through all possible Symmetry operators"
+    endif
+
+    allocate(images(3,n_atom*27))
+    ! Make image using symmetry operator
+    n_symmetry_operator = 0
+    is_symmetric(1:n_candidates) = .false.
+    do ic = 1, n_candidates
+        do ia = 1, n_atom
+            do ix = 1, 3
+                images(ix,ia) = &
+                    candidate_symmetry_operators(ix,1,ic) * atomic_coordinates(1,ia) + &
+                    candidate_symmetry_operators(ix,2,ic) * atomic_coordinates(2,ia) + &
+                    candidate_symmetry_operators(ix,3,ic) * atomic_coordinates(3,ia) + &
+                    candidate_symmetry_operators(ix,4,ic)
+            enddo
+        enddo
+
+        ! Make supercell from the imeage
+        counter = n_atom
+        do ix = -1, 1;do iy = -1, 1;do iz = -1, 1
+            if((ix .eq. 0) .and. (iy .eq. 0) .and. (iz .eq. 0)) cycle
+
+            do ia = 1, n_atom
+                counter = counter + 1
+                images(1,counter) = images(1,ia) + ix
+                images(2,counter) = images(2,ia) + iy
+                images(3,counter) = images(3,ia) + iz
+            enddo
+        enddo;enddo;enddo
+
+        ! Check all atoms have matching image
+        do ia = 1, n_atom
+            found_match = .false.
+            do ja = 1, n_atom*27
+                if( &
+                    (abs(atomic_coordinates(1,ia) - images(1,ja)) .lt. atomic_tol(1)) .and. &
+                    (abs(atomic_coordinates(2,ia) - images(2,ja)) .lt. atomic_tol(2)) .and. &
+                    (abs(atomic_coordinates(3,ia) - images(3,ja)) .lt. atomic_tol(3)) &
+                ) then
+                    found_match = .true.
+                    exit
+                endif
+            enddo
+            if(.not. found_match) exit
+        enddo
+
+        if(.not. found_match) cycle
+
+        n_symmetry_operator = n_symmetry_operator + 1
+        is_symmetric(ic) = .true.
+    enddo
+
+    allocate(symmetry_operator(3,4,n_symmetry_operator))
+
+    write(6,'(a,i6)') "findSymmetryOperators: Number of Symmetry operators =", n_symmetry_operator
+    write(6,'(a)') "findSymmetryOperators: symmetry_operator"
+    counter = 0
+    do ic = 1, n_symmetry_operator
+        if(is_symmetric(ic)) then
+            symmetry_operator(1:3,1:4,counter) = candidate_symmetry_operators(1:3,1:4,ic)
+        endif
+        write(6,'(a,i6)') "symmetry operator index", ic
+        write(6,'(4i4)') symmetry_operator(1,1:4,ic)
+        write(6,'(4i4)') symmetry_operator(2,1:4,ic)
+        write(6,'(4i4)') symmetry_operator(3,1:4,ic)
+    enddo
+
+    if(n_atom .lt. 500) deallocate(n_atom_per_species)
+    deallocate(candidate_symmetry_operators, is_symmetric, images)
+
+end subroutine findSymmetryOperators
+
+end module findSymmetryOperators_m

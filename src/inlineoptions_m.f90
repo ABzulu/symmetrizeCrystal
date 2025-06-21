@@ -24,7 +24,7 @@ subroutine getInlineOptions( &
 
     maxIteration = 100
     lattice_tol = 1.0d-2
-    atomic_tol = 1.0d-4
+    atomic_tol = 0.5d-2
     output_filename = "symmetrizedStructure.out"
     debug = .false.
 

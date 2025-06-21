@@ -1,4 +1,5 @@
 module symmetrizeConventionalCell_m
+    use constants, only: eps16
 
     implicit none
 
@@ -9,13 +10,13 @@ module symmetrizeConventionalCell_m
 contains
 
 subroutine symmetrizeConventionalCell( &
-    n_atom, atomic_coordinates, atomic_species_index, &
+    lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
     n_symm_op, symm_op, tol, debug &
 )
     integer, intent(in)          :: &
         n_atom, atomic_species_index(n_atom), &
         n_symm_op, symm_op(3,4,192)
-    double precision, intent(in) :: tol(3)
+    double precision, intent(in) :: lattice_vectors(3,3), tol(3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
     logical, intent(in)          :: debug
 
@@ -25,12 +26,13 @@ subroutine symmetrizeConventionalCell( &
     integer, allocatable          :: &
         site_index(:), n_atoms_per_site(:), atom_index_in_site(:,:), counters(:), &
         n_matching_images(:)
-    double precision              :: image(3), distance, temp_distance
+    double precision              :: &
+        image(3), distance, temp_distance, lattice_parameter(3)
     double precision, allocatable :: temp_atomic_coordintes(:,:)
     logical, allocatable          :: assigned(:)
 
     if(debug) then
-        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates"
+        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates before symmetrization"
         do ia = 1, n_atom
             write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
         enddo
@@ -38,8 +40,18 @@ subroutine symmetrizeConventionalCell( &
 
     allocate(site_index(n_atom), assigned(n_atom))
 
+    do ix = 1, 3
+        lattice_parameter(ix) = &
+            sqrt( &
+                lattice_vectors(ix,1)*lattice_vectors(ix,1) + &
+                lattice_vectors(ix,2)*lattice_vectors(ix,2) + &
+                lattice_vectors(ix,3)*lattice_vectors(ix,3) &
+            )
+    enddo
+
     site_index(:) = 0
     assigned(:) = .false.
+    n_sites_found = 0
     ! Check which atoms are grouped into same sites
     do ia = 1, n_atom
         do ja = 1, n_atom
@@ -55,9 +67,9 @@ subroutine symmetrizeConventionalCell( &
                 enddo            
 
                 if( &
-                    ((image(1) - atomic_coordinates(1,ja)) .lt. tol(1)) .and. &
-                    ((image(2) - atomic_coordinates(2,ja)) .lt. tol(3)) .and. &
-                    ((image(3) - atomic_coordinates(3,ja)) .lt. tol(2)) &
+                    (abs(image(1) - atomic_coordinates(1,ja)) .lt. tol(1)) .and. &
+                    (abs(image(2) - atomic_coordinates(2,ja)) .lt. tol(3)) .and. &
+                    (abs(image(3) - atomic_coordinates(3,ja)) .lt. tol(2)) &
                 ) then
                     if (.not. assigned(ia) .and. .not. assigned(ja)) then
                         n_sites_found = n_sites_found + 1
@@ -88,6 +100,11 @@ subroutine symmetrizeConventionalCell( &
 
     if(debug) write(6,'(a,i4)') "symmetrizeConventionalCell: Number of sites found = ", n_sites_found
     
+    if(n_sites_found .gt. n_atom) then
+        write(6,'(a)') "symmetrizeConventionalCell: Too much sites found; Stopping program"
+        stop
+    endif
+
     allocate(n_atoms_per_site(n_sites_found), counters(n_sites_found))
     do is = 1, n_sites_found
         n_atoms_per_site(is) = count(site_index(1:n_atom) .eq. is)
@@ -123,37 +140,31 @@ subroutine symmetrizeConventionalCell( &
                         dble(symm_op(ix,3,io)) * atomic_coordinates(3,iia) + &
                         dble(symm_op(ix,4,io)) / 12.d0
                     image(ix) = modulo(image(ix)+0.5d0,1.d0) - 0.5d0
+                    if(image(ix) + 0.5d0 .lt. eps16) image(ix) = 0.5d0
                 enddo
                 
                 distance = huge(1.d0)
                 matching_atom_index = 0
                 do ja = 1, n_atoms_per_site(is)
                     jja = atom_index_in_site(ja,is)
-                    temp_distance = 0
+                    temp_distance = 0.0d0
                     do ix = 1, 3
                         temp_distance = &
                             temp_distance + &
                             (image(ix) - atomic_coordinates(ix,jja)) * &
-                            (image(ix) - atomic_coordinates(ix,jja))
+                            (image(ix) - atomic_coordinates(ix,jja)) * &
+                            lattice_parameter(ix) * &
+                            lattice_parameter(ix)
                     enddo
                     temp_distance = sqrt(temp_distance)
 
                     if(temp_distance .lt. distance) then
                         distance = temp_distance
-                        temp_atomic_coordintes(1:3,1) = atomic_coordinates(ix,jja)
                         matching_atom_index = jja
                         matching_atom_site_index = ja
                     endif
                 enddo
 
-                if( &
-                    ((temp_atomic_coordintes(1,1) - image(1)) .gt. tol(1)) .or. &
-                    ((temp_atomic_coordintes(2,1) - image(2)) .gt. tol(2)) .or. &
-                    ((temp_atomic_coordintes(3,1) - image(3)) .gt. tol(3)) &
-                ) then
-                    write(6,'(a)') "symmetrizeConventionalCell: Warning! Distance between image and closest atom larger than tolerance!"
-                    write(6,'(a,2f16.9)') "symmetrizeConventionalCell: distance, tol = ", distance, tol
-                endif
                 n_matching_images(matching_atom_site_index) = &
                     n_matching_images(matching_atom_site_index) + 1
                 temp_atomic_coordintes(1:3,matching_atom_index) = &
@@ -164,11 +175,21 @@ subroutine symmetrizeConventionalCell( &
         do ia = 1, n_atoms_per_site(is)
             iia = atom_index_in_site(ia,is)
             temp_atomic_coordintes(1:3,iia) = &
-                temp_atomic_coordintes(1:3,iia) / dble(n_matching_images(ia))   
+                temp_atomic_coordintes(1:3,iia) / dble(n_matching_images(ia))
+            if(n_matching_images(ia) .eq. 0) then
+                write(6,'(a)') "symmetrizeConventionalCell: tried to divide by 0"
+            endif   
         enddo
     enddo
 
     atomic_coordinates(1:3,1:n_atom) = temp_atomic_coordintes(1:3,1:n_atom)
+
+    if(debug) then
+        write(6,'(a)') "symmetrizeConventionalCell: Atomic coordinates after symmetrization"
+        do ia = 1, n_atom
+            write(6,'(3f16.9)') atomic_coordinates(1:3,ia)
+        enddo
+    endif
 
     deallocate(site_index, assigned, n_atoms_per_site, atom_index_in_site, counters)
     deallocate(n_matching_images, temp_atomic_coordintes)

@@ -121,7 +121,7 @@ program symmetrizeCrystal
     if(debug) write(6,'(a)') "Checkpoint: Determined space group"
 
     call symmetrizeConventionalCell( &
-        n_atom, atomic_coordinates, atomic_species_index, &
+        ITA_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
         n_symm_op, symm_op, atomic_tol, debug &
     )
 
