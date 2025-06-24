@@ -4,7 +4,6 @@ program symmetrizeCrystal
     use niggliReduction_m, only: niggliReduction
     use findRotationalSymmetry_m, only: findRotationalSymmetry
     use identifyCrystal_m, only: identifyCrystal
-    use toITAConventionalCell_m, only: toITAConventionalCell
     use restricAtomicCoordinates_m, only: restricAtomicCoordinates
     use findSymmetryOperators_m, only: findSymmetryOperators
     use spacegroup_db, only: loadInSpaceGroup
@@ -28,15 +27,13 @@ program symmetrizeCrystal
     integer :: W(3,3,48), n_W, W_type(48)
     double precision :: reduced_lattice_vectors(3,3)
 
-    double precision :: ITA_lattice_vectors(3,3), original_atomic_tol
+    double precision :: original_atomic_tol
     integer :: &
         n_symm_op, ix, &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530)
     integer, allocatable :: symm_op(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
-
-    integer :: ir
 
     ! Read in command line options and inputs
     call getInlineOptions( &
@@ -72,12 +69,6 @@ program symmetrizeCrystal
     call identifyCrystal(W, n_W, W_type, crystal_type, debug)
 
     if(debug) write(6,'(a)') "Checkpoint: Determined point group"
-
-    ! call toITAConventionalCell( &
-    !     crystal_type, reduced_lattice_vectors, ITA_lattice_vectors, debug &
-    ! )
-
-    call findRotationalSymmetry(reduced_lattice_vectors, lattice_tol, W, n_W, debug)
 
     call restricAtomicCoordinates( &
         reduced_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &

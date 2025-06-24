@@ -16,7 +16,7 @@ LDFLAGS=-L$(OBJDIR) -lfdf
 
 OBJECTS=inlineoptions_m.o input_m.o f2kcli.o m_getopts.o  \
 	calculatereciprocallattice_m.o niggliReduction_m.o findRotationalSymmetry_m.o \
-	identifyCrystal_m.o toITAConventionalCell_m.o restricAtomicCoordinates_m.o \
+	identifyCrystal_m.o restricAtomicCoordinates_m.o \
 	findSymmetryOperators_m.o spacegroup_db.o identifySpaceGroup_m.o \
 	findDuplicateSymmetryOperators_m.o symmetrizeStructure_m.o writeOutput_m.o
 FDF=libfdf.a
@@ -39,7 +39,6 @@ calculatereciprocallattice_m.o:
 niggliReduction_m.o:
 findRotationalSymmetry_m.o:
 identifyCrystal_m.o:
-toITAConventionalCell_m.o:
 restricAtomicCoordinates_m.o:
 findSymmetryOperators_m.o: findDuplicateSymmetryOperators_m.o constants.o
 spacegroup_db.o:
