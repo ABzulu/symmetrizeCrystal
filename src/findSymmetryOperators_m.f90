@@ -184,6 +184,60 @@ subroutine findSymmetryOperators( &
         endif
     enddo
 
+    !!! For debugging pruposes
+    do ic = 1, n_symmetry_operators
+        do ia = 1, n_atom
+            atom_index(ia) = ia
+            do ix = 1, 3
+                images(ix,ia) = &
+                    dble(symmetry_operators(ix,1,ic)) * atomic_coordinates(1,ia) + &
+                    dble(symmetry_operators(ix,2,ic)) * atomic_coordinates(2,ia) + &
+                    dble(symmetry_operators(ix,3,ic)) * atomic_coordinates(3,ia) + &
+                    dble(symmetry_operators(ix,4,ic))/12.d0
+            enddo
+        enddo
+
+        ! Make supercell from the image
+        counter = n_atom
+        do ix = -2, 2;do iy = -2, 2;do iz = -2, 2
+            if((ix .eq. 0) .and. (iy .eq. 0) .and. (iz .eq. 0)) cycle
+
+            do ia = 1, n_atom
+                counter = counter + 1
+                atom_index(counter) = ia
+                images(1,counter) = images(1,ia) + ix
+                images(2,counter) = images(2,ia) + iy
+                images(3,counter) = images(3,ia) + iz
+            enddo
+        enddo;enddo;enddo
+
+        ! Check if all atoms have matching image
+        do ia = 1, n_atom
+            found_match = .false.
+            do ja = 1, n_atom*125
+                if(atomic_species_index(ia) .ne. atomic_species_index(atom_index(ja))) cycle
+                if( &
+                    (abs(atomic_coordinates(1,ia) - images(1,ja)) .lt. atomic_tol(1)) .and. &
+                    (abs(atomic_coordinates(2,ia) - images(2,ja)) .lt. atomic_tol(2)) .and. &
+                    (abs(atomic_coordinates(3,ia) - images(3,ja)) .lt. atomic_tol(3)) &
+                ) then
+                    found_match = .true.
+                    if(debug .and. (ia == 22)) then
+                        write(6,"(4i4)") symmetry_operators(1,1:4,ic)
+                        write(6,"(4i4)") symmetry_operators(2,1:4,ic)
+                        write(6,"(4i4)") symmetry_operators(3,1:4,ic)
+                        write(6,'(a,i5,a,i5)') "findSymmetryOperators: Atom ", ia, " matches with the image of atom ", atom_index(ja)
+                    endif    
+                    exit
+                endif
+            enddo
+            if(.not. found_match) exit
+        enddo
+
+        if(.not. found_match) cycle
+
+    enddo
+
     deallocate(n_atom_per_species)
     deallocate(candidate_symmetry_operators, is_symmetric, images)
 

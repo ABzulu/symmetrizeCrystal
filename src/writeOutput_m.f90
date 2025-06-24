@@ -40,7 +40,7 @@ subroutine writeOutput( &
     write(6,'(3f16.9)') reduced_lattice_vectors(3,1:3)
     write(6,'(a)') "writeOutput: Atomic coordinates in fractional coordinates"
     do ia = 1, n_atom
-        write(6,'(3f16.9)') temp_atomic_coordinates(1:3,ia)
+        write(6,'(3f16.9,i4)') temp_atomic_coordinates(1:3,ia), atomic_species_index(ia)
     enddo
 
     call calculateReciprocalLattice(lattice_vector, reciprocal_lattice_vector, 0)

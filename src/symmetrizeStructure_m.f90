@@ -141,6 +141,7 @@ subroutine symmetrizeStructure( &
         enddo
     endif
 
+    !!! This is way too scatch. Revise later
     allocate(n_matching_images(maxval(n_atoms_per_site(1:n_sites_found))))
     allocate(temp_atomic_coordintes(3,n_atom))
     temp_atomic_coordintes(:,:) = 0.d0
