@@ -31,8 +31,12 @@ subroutine findSymmetryOperators( &
     integer                       :: iy, iz
     double precision, allocatable :: images(:,:)
     logical                       :: found_match
+
+    integer :: count_start, count_end, rate
+    real    :: elapsed_time
     
-    ! When there are more than 500 atoms just use brute force search.
+    call system_clock(count_start, rate)
+
     allocate(n_atom_per_species(n_species))
     n_atom_per_species(:) = 0
     do is = 1, n_species
@@ -53,7 +57,7 @@ subroutine findSymmetryOperators( &
 
         ! Find candidate translational operator from other atoms of the same species
         counter = 0
-        ! if(debug) write(6,'(a)') "findSymmetryOperators: candidate_translational_operators"
+        if(debug) write(6,'(a)') "findSymmetryOperators: candidate_translational_operators"
         do iw = 1, n_W
             do ia = 1, n_atom
                 do ja = 1, n_atom
@@ -73,6 +77,12 @@ subroutine findSymmetryOperators( &
                         if(candidate_symmetry_operators(ix,4,counter) .eq. 12) &
                             candidate_symmetry_operators(ix,4,counter) = 0
                     enddo
+                    if(debug) then
+                        write(6,'(a,i8)') "findSymmetryOperators: ic = ", counter
+                        write(6,'(4i4)') candidate_symmetry_operators(1,1:4,counter)
+                        write(6,'(4i4)') candidate_symmetry_operators(2,1:4,counter)
+                        write(6,'(4i4)') candidate_symmetry_operators(3,1:4,counter)
+                    endif
                 enddo
             enddo
         enddo
@@ -94,10 +104,10 @@ subroutine findSymmetryOperators( &
         endif
     else
         n_candidates = 1728 * n_W
-        allocate(candidate_symmetry_operators(3,4,n_candidates), is_symmetric(n_candidates))
+        allocate(candidate_symmetry_operators(3,4,n_candidates))
         counter = 0
         do iw = 1, n_W
-            do ix = 0, 11;do jx = 0,11;do kx = 0,11
+            do ix = 0, 11;do jx = 0, 11;do kx = 0, 11
                 counter = counter + 1
                 do iix = 1, 3
                     candidate_symmetry_operators(iix,1:3,counter) = W(iix,1:3,iw)
@@ -108,12 +118,22 @@ subroutine findSymmetryOperators( &
             enddo;enddo;enddo
         enddo
 
-        call findDuplicateSymmetryOperators( &
-            lattice_vectors, candidate_symmetry_operators, n_candidates, debug &
-        )        
+        ! call findDuplicateSymmetryOperators( &
+        !     lattice_vectors, candidate_symmetry_operators, n_candidates, debug &
+        ! )        
+
+        allocate(is_symmetric(n_candidates))
 
         if(debug) write(6,'(a)') "findSymmetryOperators: Searching through all possible Symmetry operators"
     endif
+
+    call system_clock(count_end)
+    elapsed_time = real(count_end - count_start) / real(rate)
+    write(6,'(a,f14.4,a)') &
+        "findSymmetryOperators-make candidate symmetry operators took ", &
+        elapsed_time, " seconds"
+
+    call system_clock(count_start, rate)
 
     allocate(images(3,n_atom*125), atom_index(n_atom*125))
     ! Make image using symmetry operator
@@ -184,59 +204,11 @@ subroutine findSymmetryOperators( &
         endif
     enddo
 
-    !!! For debugging pruposes
-    do ic = 1, n_symmetry_operators
-        do ia = 1, n_atom
-            atom_index(ia) = ia
-            do ix = 1, 3
-                images(ix,ia) = &
-                    dble(symmetry_operators(ix,1,ic)) * atomic_coordinates(1,ia) + &
-                    dble(symmetry_operators(ix,2,ic)) * atomic_coordinates(2,ia) + &
-                    dble(symmetry_operators(ix,3,ic)) * atomic_coordinates(3,ia) + &
-                    dble(symmetry_operators(ix,4,ic))/12.d0
-            enddo
-        enddo
-
-        ! Make supercell from the image
-        counter = n_atom
-        do ix = -2, 2;do iy = -2, 2;do iz = -2, 2
-            if((ix .eq. 0) .and. (iy .eq. 0) .and. (iz .eq. 0)) cycle
-
-            do ia = 1, n_atom
-                counter = counter + 1
-                atom_index(counter) = ia
-                images(1,counter) = images(1,ia) + ix
-                images(2,counter) = images(2,ia) + iy
-                images(3,counter) = images(3,ia) + iz
-            enddo
-        enddo;enddo;enddo
-
-        ! Check if all atoms have matching image
-        do ia = 1, n_atom
-            found_match = .false.
-            do ja = 1, n_atom*125
-                if(atomic_species_index(ia) .ne. atomic_species_index(atom_index(ja))) cycle
-                if( &
-                    (abs(atomic_coordinates(1,ia) - images(1,ja)) .lt. atomic_tol(1)) .and. &
-                    (abs(atomic_coordinates(2,ia) - images(2,ja)) .lt. atomic_tol(2)) .and. &
-                    (abs(atomic_coordinates(3,ia) - images(3,ja)) .lt. atomic_tol(3)) &
-                ) then
-                    found_match = .true.
-                    if(debug .and. (ia == 22)) then
-                        write(6,"(4i4)") symmetry_operators(1,1:4,ic)
-                        write(6,"(4i4)") symmetry_operators(2,1:4,ic)
-                        write(6,"(4i4)") symmetry_operators(3,1:4,ic)
-                        write(6,'(a,i5,a,i5)') "findSymmetryOperators: Atom ", ia, " matches with the image of atom ", atom_index(ja)
-                    endif    
-                    exit
-                endif
-            enddo
-            if(.not. found_match) exit
-        enddo
-
-        if(.not. found_match) cycle
-
-    enddo
+    call system_clock(count_end)
+    elapsed_time = real(count_end - count_start) / real(rate)
+    write(6,'(a,f14.4,a)') &
+        "findSymmetryOperators-find symmetry operators using images took ", &
+        elapsed_time, " seconds"
 
     deallocate(n_atom_per_species)
     deallocate(candidate_symmetry_operators, is_symmetric, images)
