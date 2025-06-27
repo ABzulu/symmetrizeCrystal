@@ -42,7 +42,6 @@ subroutine findRotationalSymmetry( &
 
     W = 0
     n_W = 0
-    ! if(debug) write(6,'(a)') "findRotationalSymmetry: Candidate W"
     do i11 = -2,2; do i12 = -2,2; do i13 = -2,2
     do i21 = -2,2; do i22 = -2,2; do i23 = -2,2
     do i31 = -2,2; do i32 = -2,2; do i33 = -2,2

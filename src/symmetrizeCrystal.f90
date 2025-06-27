@@ -1,7 +1,7 @@
 program symmetrizeCrystal
     use inlineoptions_m, only: getInlineOptions
     use input_m, only: readInput, formatInput
-    use niggliReduction_m, only: niggliReduction
+    use cellReduction_m, only: cellReduction
     use findRotationalSymmetry_m, only: findRotationalSymmetry
     use identifyCrystal_m, only: identifyCrystal
     use restricAtomicCoordinates_m, only: restricAtomicCoordinates
@@ -18,7 +18,7 @@ program symmetrizeCrystal
 
     character(132) :: &
         atomic_coordinates_format, input_filename, output_filename
-    integer :: n_atom, n_species, maxIteration
+    integer :: n_atom, n_species
     integer, allocatable :: atomic_species_index(:)
     double precision :: &
         lattice_constant, lattice_vectors(3,3), lattice_tol, atomic_tol(3)
@@ -41,8 +41,7 @@ program symmetrizeCrystal
 
     ! Read in command line options and inputs
     call getInlineOptions( &
-        lattice_tol, atomic_tol(1), input_filename, output_filename, &
-        maxIteration, debug &
+        lattice_tol, atomic_tol(1), input_filename, output_filename, debug &
     )
 
     call system_clock(count_end)
@@ -76,23 +75,13 @@ program symmetrizeCrystal
 
     call system_clock(count_start, rate)
 
-    call loadInSpaceGroup( &
-        n_ops, rotations, translations, hall_symbol, ITA_index &
-    )
-
-    call system_clock(count_end)
-    elapsed_time = real(count_end - count_start) / real(rate)
-    write(6,'(a,f14.4,a)') "loadInSpaceGroup took ", elapsed_time, " seconds"
-
-    call system_clock(count_start, rate)
-
-    call niggliReduction( &
+    call cellReduction( &
         lattice_vectors, reduced_lattice_vectors, lattice_tol, debug &
     )
     
     call system_clock(count_end)
     elapsed_time = real(count_end - count_start) / real(rate)
-    write(6,'(a,f14.4,a)') "niggliReduction took ", elapsed_time, " seconds"
+    write(6,'(a,f14.4,a)') "cellReduction took ", elapsed_time, " seconds"
 
     call system_clock(count_start, rate)
 
@@ -144,6 +133,16 @@ program symmetrizeCrystal
     call system_clock(count_end)
     elapsed_time = real(count_end - count_start) / real(rate)
     write(6,'(a,f14.4,a)') "findSymmetryOperators took ", elapsed_time, " seconds"
+
+    call system_clock(count_start, rate)
+
+    call loadInSpaceGroup( &
+        n_ops, rotations, translations, hall_symbol, ITA_index &
+    )
+
+    call system_clock(count_end)
+    elapsed_time = real(count_end - count_start) / real(rate)
+    write(6,'(a,f14.4,a)') "loadInSpaceGroup took ", elapsed_time, " seconds"
 
     call system_clock(count_start, rate)
 

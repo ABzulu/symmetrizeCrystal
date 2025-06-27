@@ -10,7 +10,7 @@ module input_m
 contains
 
 subroutine readInput( &
-        input_filename, lattice_constant, lattice_vector, &
+        input_filename, lattice_constant, lattice_vectors, &
         n_atom, atomic_coordinates_format, atomic_coordinates, &
         n_species, atomic_species_index &
 )
@@ -21,7 +21,7 @@ subroutine readInput( &
     character(132), intent(out) :: atomic_coordinates_format 
     integer, intent(out) :: n_atom, n_species
     integer, allocatable, intent(out) :: atomic_species_index(:)
-    double precision, intent(out) :: lattice_constant, lattice_vector(3,3)
+    double precision, intent(out) :: lattice_constant, lattice_vectors(3,3)
     double precision, allocatable, intent(out) :: atomic_coordinates(:,:)
 
     integer :: i, ia, iounit
@@ -32,7 +32,7 @@ subroutine readInput( &
     lattice_constant = fdf_physical('LatticeConstant',0.d0,'Bohr')
     if(fdf_block('LatticeVectors', iounit)) then
         do i = 1, 3
-            read(iounit,*) lattice_vector(i,1:3)
+            read(iounit,*) lattice_vectors(i,1:3)
         Enddo
     endif
 
@@ -58,13 +58,13 @@ subroutine readInput( &
 end subroutine readInput
 
 subroutine formatInput( &
-    lattice_constant, lattice_vector, &
+    lattice_constant, lattice_vectors, &
     atomic_coordinates_format, atomic_coordinates, n_atom, debug &
 )
     character(132), intent(in) :: atomic_coordinates_format 
     integer, intent(in) :: n_atom
     double precision, intent(in) :: lattice_constant
-    double precision, intent(inout) :: lattice_vector(3,3)
+    double precision, intent(inout) :: lattice_vectors(3,3)
     double precision, intent(inout) :: atomic_coordinates(3,n_atom)
     logical, intent(in) :: debug
 
@@ -72,7 +72,7 @@ subroutine formatInput( &
     logical :: leqi
     double precision :: atomic_coordinate_temp(3)
 
-    lattice_vector = lattice_vector * lattice_constant
+    lattice_vectors = lattice_vectors * lattice_constant
 
     if(leqi(atomic_coordinates_format,'NotScaledCartesianBohr') .or. &
        leqi(atomic_coordinates_format,'Bohr')) then
@@ -92,9 +92,9 @@ subroutine formatInput( &
             atomic_coordinate_temp(1:3) = atomic_coordinates(1:3,ia)
             do i = 1, 3
                 atomic_coordinates(i,ia) = &
-                    lattice_vector(1,i) * atomic_coordinate_temp(1) + &
-                    lattice_vector(2,i) * atomic_coordinate_temp(2) + &
-                    lattice_vector(3,i) * atomic_coordinate_temp(3)
+                    atomic_coordinate_temp(1) * lattice_vectors(1,i) + &
+                    atomic_coordinate_temp(2) * lattice_vectors(2,i) + &
+                    atomic_coordinate_temp(3) * lattice_vectors(3,i)
             enddo
         enddo
     else

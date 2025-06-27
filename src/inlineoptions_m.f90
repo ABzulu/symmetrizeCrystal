@@ -10,9 +10,8 @@ module inlineoptions_m
 contains
 
 subroutine getInlineOptions( &
-    lattice_tol, atomic_tol, input_filename, output_filename, maxIteration, debug &
+    lattice_tol, atomic_tol, input_filename, output_filename, debug &
 )
-    integer, intent(out) :: maxIteration
     double precision, intent(out) :: lattice_tol, atomic_tol
     character(len=132), intent(out) :: input_filename, output_filename
     logical, intent(out) :: debug 
@@ -22,7 +21,6 @@ subroutine getInlineOptions( &
     character(len=8) :: optName
     logical, external :: makedirqq
 
-    maxIteration = 100
     lattice_tol = 1.0d-2
     atomic_tol = 0.5d-2
     output_filename = "symmetrizedStructure.out"
@@ -38,8 +36,6 @@ subroutine getInlineOptions( &
             stop
         case( 'd' )
             debug = .true.
-        case( 'i' )
-            read(optArg,*) maxIteration
         case( 'l' )
             read(optArg,*) lattice_tol
         case( 'a' )
