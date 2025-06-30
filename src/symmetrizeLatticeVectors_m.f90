@@ -1,22 +1,20 @@
-module symmetrizeStructure_m
+module symmetrizeLatticeVectors_m
     use constants, only: eps16
     use kinds, only: DP
 
     implicit none
 
-    public :: symmetrizeStructure
+    public :: symmetrizeLatticeVectors
 
     private
 
 contains
 
-subroutine symmetrizeStructure( &
-    lattice_vectors, n_atom, atomic_coordinates, &
-    n_W, W, n_symmetry_operators, symmetry_operators, debug &
+subroutine symmetrizeLatticeVectors( &
+    lattice_vectors, n_W, W, debug &
 )
-    integer, intent(in)     :: n_atom, n_W, W(3,3,n_W), n_symmetry_operators, &
-                               symmetry_operators(3,4,n_symmetry_operators)
-    real(DP), intent(inout) :: lattice_vectors(3,3), atomic_coordinates(3,n_atom)
+    integer, intent(in)     :: n_W, W(3,3,n_W)
+    real(DP), intent(inout) :: lattice_vectors(3,3)
     logical, intent(in)     :: debug
 
     external :: dgesvd, dgemm
@@ -26,7 +24,7 @@ subroutine symmetrizeStructure( &
 
     external :: dsyev
     integer  :: iw, ix, jx
-    real(DP) :: G(3,3), temp_G(3,3), symm_G(3,3), &
+    real(DP) :: G(3,3), temp_G(3,3), symm_G(3,3), theta(3), &
                 Evec(3,3), Ev(3), temp_M(3,3), symm_P(3,3)
 
     real(DP) :: temp_lattice_vectors(3,3)
@@ -50,7 +48,7 @@ subroutine symmetrizeStructure( &
     allocate(work(lwork))
     call dgesvd('A','A',3,3,temp_lattice_vectors,3,S,U,3,VT,3,work,lwork,info)
     if(info .ne. 0) then
-        write(6,'(a)') "symmetrizeStructure: SVD failed for lattice vector matrix"
+        write(6,'(a)') "symmetrizeLatticeVectors: SVD failed for lattice vector matrix"
         stop
     endif
     do ix = 1, 3;do jx = 1, 3
@@ -59,6 +57,17 @@ subroutine symmetrizeStructure( &
             U(ix,2) * VT(2,jx) + &
             U(ix,3) * VT(3,jx)
     enddo;enddo
+    if(abs(R(1,1) - 1.d0) .gt. eps16) then
+        theta(1) = acos(R(2,2))
+    elseif(abs(R(2,2) - 1.d0) .gt. eps16) then
+        theta(1) = acos(R(1,1))
+    elseif(abs(R(3,3) - 1.d0) .gt. eps16) then
+        theta(1) = acos(R(1,1))
+    else
+        write(6,'(a)') "symmetrizeLatticeVectors: R is not a rotation matrix"
+        stop        
+    endif
+    if(debug) write(6,'(a,f16.9)') "symmetrizeLatticeVectors: theta (degree) = ", theta(1)*180.d0/(4.d0*atan(1.d0))
     temp_S(1,1:3) = [ S(1), 0.d0, 0.d0 ]
     temp_S(2,1:3) = [ 0.d0, S(2), 0.d0 ]
     temp_S(3,1:3) = [ 0.d0, 0.d0, S(3) ]
@@ -121,6 +130,7 @@ subroutine symmetrizeStructure( &
 
     symm_G(1:3,1:3) = 0.d0
     do iw = 1, n_W
+        
         do ix = 1, 3; do jx = 1, 3
             temp_G(ix,jx) = &
                 W(1,ix,iw) * G(1,jx) + & 
@@ -137,11 +147,18 @@ subroutine symmetrizeStructure( &
     enddo
     symm_G(1:3,1:3) = symm_G(1:3,1:3) / dble(n_W)
     if(debug) then
-        write(6,'(a)') "symmetrizeStructure: Symmetrized Metric tensor "
+        write(6,'(a)') "symmetrizeLatticeVectors: Symmetrized Metric tensor "
         write(6,'(3f16.9)') symm_G(1,1:3)
         write(6,'(3f16.9)') symm_G(2,1:3)
         write(6,'(3f16.9)') symm_G(3,1:3)
     endif
+    
+    do ix = 1, 3;do jx = 1, 3
+        lattice_vectors(ix,jx) = &
+            R(ix,1) * symm_P(1,jx) + &
+            R(ix,2) * symm_P(2,jx) + &
+            R(ix,3) * symm_P(3,jx)
+    enddo;enddo
 
     ! We want to finde the symmetrized P
     ! Diagonalize symmetrized G so that G = Udiag(x1,x2,x3)U^T
@@ -157,16 +174,16 @@ subroutine symmetrizeStructure( &
     allocate(work(lwork))
     call dsyev('V','U',3,Evec,3,Ev,work,lwork,info)
     if(info .ne. 0) then
-        write(6,'(a)') "symmetrizeStructure: Diagonalization failed for symmetrized G"
+        write(6,'(a)') "symmetrizeLatticeVectors: Diagonalization failed for symmetrized G"
         stop
     endif
     if(debug) then
-        write(6,'(a)') "symmetrizeStructure: Diagonalization of symmetrized metric tensor"
-        write(6,'(a)') "symmetrizeStructure: Eigenvectors"
+        write(6,'(a)') "symmetrizeLatticeVectors: Diagonalization of symmetrized metric tensor"
+        write(6,'(a)') "symmetrizeLatticeVectors: Eigenvectors"
         write(6,'(3f16.9)') Evec(1,1:3)
         write(6,'(3f16.9)') Evec(2,1:3)
         write(6,'(3f16.9)') Evec(3,1:3)
-        write(6,'(a)') "symmetrizeStructure: Eigenvalues"
+        write(6,'(a)') "symmetrizeLatticeVectors: Eigenvalues"
         write(6,'(3f16.9)') Ev(1:3)
     endif
 
@@ -186,26 +203,25 @@ subroutine symmetrizeStructure( &
             temp_P(ix,3) * Evec(jx,3)
     enddo;enddo
     if(debug) then
-        write(6,'(a)') "symmetrizeStructure: Symmetrized P"
+        write(6,'(a)') "symmetrizeLatticeVectors: Symmetrized P"
         write(6,'(3f16.9)') symm_P(1,1:3)
         write(6,'(3f16.9)') symm_P(2,1:3)
         write(6,'(3f16.9)') symm_P(3,1:3)
     endif
 
-    do ix = 1, 3;do jx = 1, 3
-        lattice_vectors(ix,jx) = &
-            R(ix,1) * symm_P(1,jx) + &
-            R(ix,2) * symm_P(2,jx) + &
-            R(ix,3) * symm_P(3,jx)
-    enddo;enddo
-
     if(debug) then
-        write(6,'(a)') "symmetrizeStructure: Symmetrized Lattice vector "
+        write(6,'(a)') "symmetrizeLatticeVectors: Symmetrized Lattice vector "
         write(6,'(3f16.9)') lattice_vectors(1:3,1)
         write(6,'(3f16.9)') lattice_vectors(1:3,2)
         write(6,'(3f16.9)') lattice_vectors(1:3,3)
     endif
 
-end subroutine symmetrizeStructure
+    do ix = 1, 3;do jx = 1, 3
+        temp_lattice_vectors(ix,jx) = &
+            lattice_vectors(jx,ix)
+    enddo;enddo
+    lattice_vectors = temp_lattice_vectors
 
-end module symmetrizeStructure_m
+end subroutine symmetrizeLatticeVectors
+
+end module symmetrizeLatticeVectors_m

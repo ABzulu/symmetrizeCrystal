@@ -8,7 +8,7 @@ program symmetrizeCrystal
     use findSymmetryOperators_m, only: findSymmetryOperators
     use spacegroup_db, only: loadInSpaceGroup
     use identifySpaceGroup_m, only: identifySpaceGroup
-    use symmetrizeStructure_m, only: symmetrizeStructure
+    use symmetrizeLatticeVectors_m, only: symmetrizeLatticeVectors
     use writeOutput_m, only: writeOutput
 
     implicit none
@@ -101,6 +101,16 @@ program symmetrizeCrystal
 
     call system_clock(count_start, rate)
 
+    call symmetrizeLatticeVectors( &
+        reduced_lattice_vectors, n_W, W, debug &
+    )
+
+    call system_clock(count_end)
+    elapsed_time = real(count_end - count_start) / real(rate)
+    write(6,'(a,f14.4,a)') "symmetrizeLatticeVectors took ", elapsed_time, " seconds"    
+
+    call system_clock(count_start, rate)
+
     call restricAtomicCoordinates( &
         reduced_lattice_vectors, n_atom, atomic_coordinates, debug &
     )
@@ -161,17 +171,12 @@ program symmetrizeCrystal
         write(6,'(a)') "Could not find space group."
         stop
     endif
-            
+     
     call system_clock(count_start, rate)
-
-    call symmetrizeStructure( &
-        reduced_lattice_vectors, n_atom, atomic_coordinates, &
-        n_W, W, n_symmetry_operators, symmetry_operators, debug &
-    )
 
     call system_clock(count_end)
     elapsed_time = real(count_end - count_start) / real(rate)
-    write(6,'(a,f14.4,a)') "symmetrizeStructure took ", elapsed_time, " seconds"
+    write(6,'(a,f14.4,a)') "symmetrizeAtomicCoordinates took ", elapsed_time, " seconds"
 
     call system_clock(count_start, rate)
 
