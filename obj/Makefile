@@ -44,7 +44,7 @@ findSymmetryOperators_m.o: findDuplicateSymmetryOperators_m.o constants.o
 spacegroup_db.o:
 identifySpaceGroup_m.o: constants.o
 findDuplicateSymmetryOperators_m.o: constants.o
-symmetrizeStructure_m.o:
+symmetrizeStructure_m.o: constants.o kinds.o
 writeOutput_m.o: constants.o calculatereciprocallattice_m.o
 spacegroup_db.o: spacegroup_db.f90
 	$(FC) -O0 $(IFLAGS) $(MDFLAGS) -c $<

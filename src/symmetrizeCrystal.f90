@@ -165,8 +165,8 @@ program symmetrizeCrystal
     call system_clock(count_start, rate)
 
     call symmetrizeStructure( &
-        reduced_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
-        n_symmetry_operators, symmetry_operators, atomic_tol, debug &
+        reduced_lattice_vectors, n_atom, atomic_coordinates, &
+        n_W, W, n_symmetry_operators, symmetry_operators, debug &
     )
 
     call system_clock(count_end)
