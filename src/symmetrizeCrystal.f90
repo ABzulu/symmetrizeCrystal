@@ -26,14 +26,14 @@ program symmetrizeCrystal
     logical :: debug
 
     character(132) :: crystal_type
-    integer :: W(3,3,48), n_W, W_type(48)
+    integer :: W(3,3,48), n_W
     double precision :: reduced_lattice_vectors(3,3)
 
     double precision :: original_atomic_tol
     integer :: &
-        n_symm_op, ix, &
+        n_symmetry_operators, ix, &
         n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530)
-    integer, allocatable :: symm_op(:,:,:)
+    integer, allocatable :: symmetry_operators(:,:,:)
     character(len=17) :: hall_symbol(530)
     logical :: found_space_group
 
@@ -93,7 +93,7 @@ program symmetrizeCrystal
 
     call system_clock(count_start, rate)
 
-    call identifyCrystal(W, n_W, W_type, crystal_type, debug)
+    call identifyCrystal(W, n_W, crystal_type, debug)
 
     call system_clock(count_end)
     elapsed_time = real(count_end - count_start) / real(rate)
@@ -102,7 +102,7 @@ program symmetrizeCrystal
     call system_clock(count_start, rate)
 
     call restricAtomicCoordinates( &
-        reduced_lattice_vectors, lattice_vectors, n_atom, atomic_coordinates, debug &
+        reduced_lattice_vectors, n_atom, atomic_coordinates, debug &
     )
 
     call system_clock(count_end)
@@ -127,7 +127,7 @@ program symmetrizeCrystal
     call findSymmetryOperators( &
         reduced_lattice_vectors, &
         n_atom, atomic_coordinates, n_species, atomic_species_index, & 
-        atomic_tol, n_W, W, n_symm_op, symm_op, debug &
+        atomic_tol, n_W, W, n_symmetry_operators, symmetry_operators, debug &
     )
 
     call system_clock(count_end)
@@ -147,8 +147,8 @@ program symmetrizeCrystal
     call system_clock(count_start, rate)
 
     call identifySpaceGroup( &
-        symm_op, n_symm_op, &
-        n_ops, rotations, translations, hall_symbol, found_space_group, debug &
+        symmetry_operators, n_symmetry_operators, &
+        n_ops, rotations, translations, hall_symbol, ITA_index, found_space_group, debug &
     )
 
     call system_clock(count_end)
@@ -166,7 +166,7 @@ program symmetrizeCrystal
 
     call symmetrizeStructure( &
         reduced_lattice_vectors, n_atom, atomic_coordinates, atomic_species_index, &
-        n_symm_op, symm_op, atomic_tol, debug &
+        n_symmetry_operators, symmetry_operators, atomic_tol, debug &
     )
 
     call system_clock(count_end)

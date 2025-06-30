@@ -7,13 +7,12 @@ module identifyCrystal_m
 
 contains
 
-subroutine identifyCrystal(W, n_W, W_type, crystal_type, debug)
+subroutine identifyCrystal(W, n_W, crystal_type, debug)
     integer, intent(in) :: W(3,3,48), n_W
     logical, intent(in) :: debug
-    integer, intent(out) :: W_type(48)
     character(len=132), intent(out) :: crystal_type
 
-    integer :: iw, ix, trace, determinant, counter(10)
+    integer :: iw, ix, trace, determinant, counter(10), W_type(48)
 
     write(6,'(a)') "identifyCrystal: Type of rotation matrix W"
     

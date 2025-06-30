@@ -9,11 +9,11 @@ contains
 
 subroutine identifySpaceGroup( &
     symmetry_operators, n_symmetry_operators, &
-    n_ops, rotations, translations, hall_symbol, found_space_group, debug &
+    n_ops, rotations, translations, hall_symbol, ITA_index, found_space_group, debug &
 )
     integer, intent(inout) :: &
         symmetry_operators(3,4,n_symmetry_operators), n_symmetry_operators, &
-        n_ops(530), rotations(3,3,192,530), translations(3,192,530)
+        n_ops(530), rotations(3,3,192,530), translations(3,192,530), ITA_index(530)
     character(len=17), intent(in) :: hall_symbol(530)
     logical, intent(in) :: debug
     logical, intent(out) :: found_space_group
@@ -59,6 +59,7 @@ subroutine identifySpaceGroup( &
         if(all(w_found_in_group(1:n_symmetry_operators))) then
             write(6,'(a)') "identifySpaceGroup: Successfully found Space group"
             write(6,'(a,a)') "identifySpaceGroup: Hall symbol = ", trim(hall_symbol(ig))
+            write(6,'(a,i6)') "identifySpaceGroup: ITA index = ", ITA_index(ig)
             found_space_group = .true.
             exit
         endif
@@ -170,6 +171,7 @@ subroutine identifySpaceGroup( &
                 if(all(w_found_in_group(1:n_symmetry_operators))) then
                     write(6,'(a)') "identifySpaceGroup: Successfully found Space group"
                     write(6,'(a,a)') "identifySpaceGroup: Hall symbol = ", trim(hall_symbol(ig))
+                    write(6,'(a,i6)') "identifySpaceGroup: ITA index = ", ITA_index(ig)
                     found_space_group = .true.
                     exit
                 endif

@@ -11,6 +11,7 @@ contains
 subroutine calculateReciprocalLattice(A, B, iopt)
     ! Calculate reciprocal lattice vectors.
     ! Their product with direct lattice vectors is 1 if iopt = 0 or 2pi if iopt = 1
+    ! AB^T = I not AB = I. This is to match the formating of A.
 
     implicit none
 
